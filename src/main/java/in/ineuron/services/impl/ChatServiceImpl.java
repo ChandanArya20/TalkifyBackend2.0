@@ -14,6 +14,7 @@ import in.ineuron.utils.UserUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +66,10 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<Chat> findAllChatsByUserId(Long userId) {
         User user = userService.findUserById(userId);
-        return chatRepo.findByMembersContaining(user);
+        List<Chat> chats = chatRepo.findByMembersContaining(user);
+        Collections.reverse(chats);
+
+        return chats;
     }
 
     @Override

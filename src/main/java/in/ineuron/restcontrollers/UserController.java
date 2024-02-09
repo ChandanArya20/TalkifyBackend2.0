@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/user")
@@ -201,7 +202,10 @@ public class UserController {
         if(query.isEmpty()){
             return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<>());
         }
+
+        User reqUser = userService.fetchUserByAuthToken(authToken);
         List<User> users = userService.searchUser(query);
+        users=users.stream().filter(user-> user.getId() != reqUser.getId()).toList();
         return ResponseEntity.status(HttpStatus.OK).body(userUtils.getUserResponse(users));
     }
 
