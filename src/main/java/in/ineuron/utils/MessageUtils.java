@@ -17,23 +17,20 @@ import java.util.List;
 public class MessageUtils {
 
     private final UserUtils userUtils;
-    private final ChatUtils chatUtils;
 
-    public MessageUtils(UserUtils userUtils, ChatUtils chatUtils) {
+    public MessageUtils(UserUtils userUtils) {
         this.userUtils = userUtils;
-        this.chatUtils = chatUtils;
     }
 
     public MessageResponse getMessageResponse(Message message){
 
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
-        ChatResponse chatResponse = chatUtils.getChatResponse(message.getChat());
 
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message,messageResponse);
 
         messageResponse.setCreatedBy(createdBy);
-        messageResponse.setChat(chatResponse);
+        messageResponse.setChatId(message.getChat().getId());
 
         return messageResponse;
     }
@@ -44,15 +41,7 @@ public class MessageUtils {
 
         for(Message message:messages){
 
-            UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
-            ChatResponse chatResponse = chatUtils.getChatResponse(message.getChat());
-
-            MessageResponse messageResponse = new MessageResponse();
-            BeanUtils.copyProperties(message,messageResponse);
-
-            messageResponse.setCreatedBy(createdBy);
-            messageResponse.setChat(chatResponse);
-
+            MessageResponse messageResponse = getMessageResponse(message);
             messageResponses.add(messageResponse);
         }
         return messageResponses;

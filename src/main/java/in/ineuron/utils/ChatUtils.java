@@ -1,10 +1,10 @@
 package in.ineuron.utils;
 
 import in.ineuron.dto.ChatResponse;
+import in.ineuron.dto.MessageResponse;
 import in.ineuron.dto.UserResponse;
 import in.ineuron.models.Chat;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -13,9 +13,11 @@ import java.util.*;
 public class ChatUtils {
 
     private final UserUtils userUtils;
+    private final MessageUtils messageUtils;
 
-    public ChatUtils(UserUtils userUtils) {
+    public ChatUtils(UserUtils userUtils, MessageUtils messageUtils) {
         this.userUtils = userUtils;
+        this.messageUtils = messageUtils;
     }
 
     public ChatResponse getChatResponse(Chat chat){
@@ -23,6 +25,7 @@ public class ChatUtils {
         UserResponse createdBy = userUtils.getUserResponse(chat.getCreatedBy());
         List<UserResponse> admins = userUtils.getUserResponse(chat.getAdmins());
         List<UserResponse> users = userUtils.getUserResponse(chat.getMembers());
+        List<MessageResponse> messageResponses = messageUtils.getMessageResponse(chat.getMessages());
 
         ChatResponse chatResponse = new ChatResponse();
         BeanUtils.copyProperties(chat,chatResponse);
@@ -30,6 +33,7 @@ public class ChatUtils {
         chatResponse.setCreatedBy(createdBy);
         chatResponse.setAdmins(new HashSet<>(admins));
         chatResponse.setMembers(new HashSet<>(users));
+        chatResponse.setMessages(messageResponses);
 
         return chatResponse;
     }
@@ -39,17 +43,7 @@ public class ChatUtils {
 
         for(Chat chat:chats){
 
-            UserResponse createdBy = userUtils.getUserResponse(chat.getCreatedBy());
-            List<UserResponse> admins = userUtils.getUserResponse(chat.getAdmins());
-            List<UserResponse> users = userUtils.getUserResponse(chat.getMembers());
-
-            ChatResponse chatResponse = new ChatResponse();
-            BeanUtils.copyProperties(chat,chatResponse);
-
-            chatResponse.setCreatedBy(createdBy);
-            chatResponse.setAdmins(new HashSet<>(admins));
-            chatResponse.setMembers(new HashSet<>(users));
-
+            ChatResponse chatResponse = getChatResponse(chat);
             chatResponses.add(chatResponse);
         }
         return chatResponses;

@@ -19,5 +19,5 @@ public class MessageResponse {
 
     private UserResponse createdBy;
 
-    private ChatResponse chat;
+    private Long chatId;
 }

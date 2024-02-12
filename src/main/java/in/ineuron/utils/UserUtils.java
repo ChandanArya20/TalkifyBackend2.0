@@ -77,8 +77,7 @@ public class UserUtils {
         List<UserResponse> userResponses = new ArrayList<>();
 
         for(User user:users){
-            UserResponse userResponse = new UserResponse();
-            BeanUtils.copyProperties(user,userResponse);
+            UserResponse userResponse = getUserResponse(user);
             userResponses.add(userResponse);
         }
         return userResponses;
