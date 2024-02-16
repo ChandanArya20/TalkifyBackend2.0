@@ -8,6 +8,8 @@ import in.ineuron.models.Message;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,11 +27,14 @@ public class MessageUtils {
     public MessageResponse getMessageResponse(Message message){
 
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
+        LocalTime localTime = message.getCreationTime().toLocalTime();
+        String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
 
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message,messageResponse);
 
         messageResponse.setCreatedBy(createdBy);
+        messageResponse.setCreationTime(formatTime);
         messageResponse.setChatId(message.getChat().getId());
 
         return messageResponse;

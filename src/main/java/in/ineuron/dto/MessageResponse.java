@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 public class MessageResponse {
@@ -15,7 +16,7 @@ public class MessageResponse {
 
     private String textMessage;
 
-    private LocalDateTime creationTime;
+    private String creationTime;
 
     private UserResponse createdBy;
 

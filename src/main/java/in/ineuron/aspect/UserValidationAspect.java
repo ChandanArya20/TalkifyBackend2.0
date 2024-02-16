@@ -21,7 +21,7 @@ public class UserValidationAspect {
 
     @Before("@annotation(in.ineuron.annotation.ValidateUser) && args(authToken, ..)")
     public void validateUserBeforeMethodExecution(@CookieValue("auth-token") String authToken) {
-        System.out.println(authToken);
+
         if (!tokenService.isValidToken(authToken)) {
             throw new TokenException("Session is expired");
         }

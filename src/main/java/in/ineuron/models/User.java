@@ -13,7 +13,7 @@ public class User {
 	@Id
 //	@GenericGenerator(name = "gen",strategy = "in.ineuron.idgenerator.IdGenerator")
 //	@GeneratedValue(generator = "gen")
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(nullable = false)
