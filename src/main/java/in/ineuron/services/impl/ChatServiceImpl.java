@@ -5,6 +5,7 @@ import in.ineuron.exception.ChatNotFoundException;
 import in.ineuron.exception.UserNotAuthorizedException;
 import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.Chat;
+import in.ineuron.models.Message;
 import in.ineuron.models.User;
 import in.ineuron.repositories.ChatRepository;
 import in.ineuron.services.ChatService;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -44,7 +46,14 @@ public class ChatServiceImpl implements ChatService {
 
         Optional<Chat> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
         if(chatOptional.isPresent()){
-            return chatOptional.get();
+            Chat chat = chatOptional.get();
+
+            //check if user deleted chat previously
+            if(chat.getDeletedByUsers().contains(reqUser)){
+                chat.getDeletedByUsers().remove(reqUser);
+                return chatRepo.save(chat);
+            }
+            return chat;
         }
 
         Chat newChat = new Chat();
@@ -66,8 +75,18 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<Chat> findAllChatsByUserId(Long userId) {
         User user = userService.findUserById(userId);
-        List<Chat> chats = chatRepo.findByMembersContaining(user);
+        List<Chat> chats = chatRepo.findNonDeletedChatsByUser(user);
         Collections.reverse(chats);
+
+        // Filter out deleted messages from each chat
+        chats.forEach(chat -> {
+            List<Message> messages = chat.getMessages()
+                    .stream()
+                    .filter(message -> !message.getDeletedByUsers().contains(user))
+                    .collect(Collectors.toList());
+
+            chat.setMessages(messages);
+        });
 
         return chats;
     }
@@ -141,8 +160,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public void deleteChat(Long chatId, Long userId) {
-
+    public Chat deleteChat(Long chatId, Long userId) {
         Chat chat = findChatById(chatId);
         User user = userService.findUserById(userId);
 
@@ -153,6 +171,16 @@ public class ChatServiceImpl implements ChatService {
         if (!chat.getMembers().contains(user)) {
             throw new UserNotFoundException("User not found in the chat");
         }
-        chatRepo.delete(chat);
+
+        // Delete messages associated with the chat
+        for (Message message : chat.getMessages()) {
+            message.getDeletedByUsers().add(user);
+        }
+
+        // Mark chat as deleted by the user
+        chat.getDeletedByUsers().add(user);
+
+        return chatRepo.save(chat);
     }
+
 }

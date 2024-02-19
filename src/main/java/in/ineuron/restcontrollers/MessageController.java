@@ -2,13 +2,16 @@ package in.ineuron.restcontrollers;
 
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.ChatMessageRequest;
+import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.MessageRequest;
 import in.ineuron.dto.MessageResponse;
+import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
 import in.ineuron.models.User;
 import in.ineuron.services.MessageService;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
+import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.MessageUtils;
 import in.ineuron.utils.UserUtils;
 import lombok.AllArgsConstructor;
@@ -35,9 +38,10 @@ public class MessageController {
     private TokenStorageService tokenService;
     private MessageUtils messageUtils;
     private SimpMessagingTemplate messagingTemplate;
+    private ChatUtils chatUtils;
 
     @MessageMapping("/message/send")
-    public void sendMessageHandler(
+    public void sendMessage(
             @Payload MessageRequest msgReq ) {
 
         Message message = messageService.sendMessage(msgReq, msgReq.getUserId());
@@ -49,30 +53,39 @@ public class MessageController {
         messagingTemplate.convertAndSend("/topic/message"+msgReq.getChatId(), messageResponse);
     }
 
-    @MessageMapping("/messages/chat")
-    public void handleWebSocketChatMessages(@Payload ChatMessageRequest req) {
+    @MessageMapping("/chat/messages")
+    public void getChatMessages(@Payload ChatMessageRequest req) {
 
-        List<Message> messages = messageService.getChatsMessage(req.getChatId(), req.getReqUserId());
+        List<Message> messages = messageService.getChatMessages(req.getChatId(), req.getReqUserId());
         List<MessageResponse> messageResponses = messageUtils.getMessageResponse(messages);
 
         messagingTemplate.convertAndSend("/topic/messages"+req.getChatId(), messageResponses);
     }
 
-//    @GetMapping("/chat/{chat-id}")
-//    public ResponseEntity<List<MessageResponse>> getChatsMessageHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
-//
-//        Long reqUser = tokenService.getUserIdFromToken(authToken);
-//        List<Message> messages = messageService.getChatsMessage(chatId,reqUser);
-//        return ResponseEntity.ok(messageUtils.getMessageResponse(messages));
-//    }
+    @GetMapping("/chat/{chat-id}")
+    public ResponseEntity<List<MessageResponse>> getChatMessagesHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
+
+        Long reqUser = tokenService.getUserIdFromToken(authToken);
+        List<Message> messages = messageService.getChatMessages(chatId,reqUser);
+        return ResponseEntity.ok(messageUtils.getMessageResponse(messages));
+    }
+
+    @DeleteMapping("/delete-all/chat/{chat-id}")
+    @ValidateUser
+    public ResponseEntity<ChatResponse> deleteAllMessages(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
+
+        Long reqUser = tokenService.getUserIdFromToken(authToken);
+        Chat chat = messageService.deleteAllMessagesByChatId(chatId, reqUser);
+        return ResponseEntity.ok(chatUtils.getChatResponse(chat));
+    }
 
     @DeleteMapping("/{message-id}")
     @ValidateUser
-    public ResponseEntity<String> deleteMessageHandler(@CookieValue("auth-token") String authToken, @PathVariable("message-id") Long messageId) {
+    public ResponseEntity<Message> deleteMessageHandler(@CookieValue("auth-token") String authToken, @PathVariable("message-id") Long messageId) {
 
         Long reqUser = tokenService.getUserIdFromToken(authToken);
-        messageService.deleteMessage(messageId,reqUser);
-        return ResponseEntity.ok("Message deleted successfully...");
+        Message message = messageService.deleteMessage(messageId, reqUser);
+        return ResponseEntity.ok(message);
     }
 
 

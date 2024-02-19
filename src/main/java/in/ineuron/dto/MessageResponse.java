@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class MessageResponse {
@@ -21,4 +23,5 @@ public class MessageResponse {
     private UserResponse createdBy;
 
     private Long chatId;
+
 }

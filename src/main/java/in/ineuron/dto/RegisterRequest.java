@@ -30,9 +30,14 @@ public class RegisterRequest {
 	private String password;
 
 	@AssertTrue(message = "Invalid phone format")
-	private boolean isPhoneValid() {
-		// Perform the validation only if phone is not null
-		return phone == null || phone.matches("^[6-9][0-9]*$") && phone.length() == 10;
+	public boolean isPhoneValid() {
+		if (phone == null || phone.isEmpty()) {
+			phone=null;
+			return true;
+		}
+
+		// Perform the validation only if phone is not null and not empty
+		return phone.matches("^[6-9][0-9]*$") && phone.length() == 10;
 	}
 
 }

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -31,8 +31,6 @@ public class MessageServiceImpl implements MessageService {
     private UserUtils userUtils;
     private MessageUtils messageUtils;
     private ChatRepository chatRepo;
-
-
 
     @Override
     public Message sendMessage(MessageRequest messReq, Long reqUserId) {
@@ -57,14 +55,19 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Message> getChatsMessage(Long chatId, Long reqUserId) {
+    public List<Message> getChatMessages(Long chatId, Long reqUserId) {
 
         Chat chat = chatService.findChatById(chatId);
         User user = userService.findUserById(reqUserId);
+
         if(!chat.getMembers().contains(user)){
             throw new UserNotAuthorizedException("You are not authorized for this chat with id "+chatId);
         }else {
-            return msgRepo.findByChat(chatService.findChatById(chatId));
+            List<Message> messages = msgRepo.findByChat(chatService.findChatById(chatId));
+            return messages.stream()
+                    .filter(message -> !message.getDeletedByUsers().contains(user))
+                    .toList();
+
         }
     }
 
@@ -76,13 +79,45 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void deleteMessage(Long messageId, Long reqUserId) {
+    public Message deleteMessage(Long messageId, Long reqUserId) {
         Message msg = findMessageById(messageId);
+        User user = userService.findUserById(reqUserId);
 
         if(msg.getCreatedBy().getId().equals(messageId)){
-            msgRepo.deleteById(messageId);
+            msg.getDeletedByUsers().add(user);
+            return msgRepo.save(msg);
         }else {
             throw new UserNotAuthorizedException("You are not authorized for this message with id "+messageId);
+        }
+    }
+
+    @Override
+    public Chat deleteAllMessagesByChatId(Long chatId, Long reqUserId) {
+
+        Chat chat = chatService.findChatById(chatId);
+        User user = userService.findUserById(reqUserId);
+
+        if(!chat.getMembers().contains(user)){
+            throw new UserNotAuthorizedException("You are not authorized for this chat with id "+chatId);
+        }else {
+            List<Message> messages = msgRepo.findByChat(chatService.findChatById(chatId));
+
+            // Delete messages associated with the chat
+            for (Message message : messages) {
+                message.getDeletedByUsers().add(user);
+            }
+            chat.setMessages(messages);
+            Chat updatedChat = chatRepo.save(chat);
+
+            // Filter out deleted messages from chat
+            List<Message> messagesList = updatedChat.getMessages()
+                    .stream()
+                    .filter(message -> !message.getDeletedByUsers().contains(user))
+                    .toList();
+
+            chat.setMessages(messagesList);
+
+            return chat;
         }
     }
 }

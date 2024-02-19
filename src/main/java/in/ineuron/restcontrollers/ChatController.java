@@ -96,13 +96,13 @@ public class ChatController {
         return ResponseEntity.ok(chat);
     }
 
-    @DeleteMapping("/{chat-id}/delete-group")
-    public ResponseEntity<String> renameGroupHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId, HttpServletRequest request) {
+    @DeleteMapping("/{chat-id}/delete")
+    public ResponseEntity<Chat> deleteChat(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
 
         Long userId = tokenService.getUserIdFromToken(authToken);
-        chatService.deleteChat(chatId, userId);
+        Chat chat = chatService.deleteChat(chatId, userId);
 
-        return ResponseEntity.ok("Chat deleted successfully..");
+        return ResponseEntity.ok(chat);
     }
 
 }

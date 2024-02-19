@@ -6,6 +6,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,6 +29,9 @@ public class Message {
     @ManyToOne
     @JsonIgnore
     private Chat chat;
+
+    @ManyToMany
+    private Set<User> deletedByUsers = new HashSet<>();
 
     @Override
     public String toString() {

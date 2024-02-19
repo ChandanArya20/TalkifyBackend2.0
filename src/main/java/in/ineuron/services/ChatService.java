@@ -14,6 +14,6 @@ public interface ChatService {
     public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId);
     public Chat renameGroup(Long chatId, String newChatName, Long reqUserId);
     public Chat removeUserFromGroup(Long chatId, Long userId, Long reqUserId);
-    public void deleteChat(Long chatId, Long userId);
+    public Chat deleteChat(Long chatId, Long userId);
 
 }

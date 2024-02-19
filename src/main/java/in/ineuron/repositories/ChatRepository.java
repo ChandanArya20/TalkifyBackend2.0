@@ -13,7 +13,8 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("SELECT c FROM Chat c WHERE c.isGroup=false AND :reqUserId MEMBER OF c.members AND :participantId MEMBER OF c.members")
     public Optional<Chat> findSingleChatByUserIds(User reqUserId, User participantId );
 
-    public List<Chat> findByMembersContaining(User user);
+    @Query("SELECT c FROM Chat c WHERE :user NOT MEMBER OF c.deletedByUsers AND :user MEMBER OF c.members")
+    List<Chat> findNonDeletedChatsByUser(User user);
 
 
 }

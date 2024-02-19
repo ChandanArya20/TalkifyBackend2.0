@@ -35,6 +35,9 @@ public class Chat {
     @OneToMany
     private List<Message> messages=new ArrayList<>();
 
+    @ManyToMany
+    private Set<User> deletedByUsers = new HashSet<>();
+
     @Override
     public String toString() {
         return "Chat{" +

@@ -58,6 +58,7 @@ public class UserController {
     @ValidateRequestData
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest requestData, BindingResult result, HttpServletResponse response) {
 
+        System.out.println(requestData);
         // Check if the email is already registered
         if (userService.isUserAvailableByEmail(requestData.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already registered with another account");
