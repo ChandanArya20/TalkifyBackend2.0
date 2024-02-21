@@ -25,10 +25,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/api/message")
-@ValidateUser
 @AllArgsConstructor
 public class MessageController {
 
@@ -76,6 +76,15 @@ public class MessageController {
 
         Long reqUser = tokenService.getUserIdFromToken(authToken);
         Chat chat = messageService.deleteAllMessagesByChatId(chatId, reqUser);
+        return ResponseEntity.ok(chatUtils.getChatResponse(chat));
+    }
+
+    @DeleteMapping("/delete/chat/{chat-id}")
+    @ValidateUser
+    public ResponseEntity<ChatResponse> deleteMessages(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId, @RequestBody  Set<Long> messageIds) {
+
+        Long reqUser = tokenService.getUserIdFromToken(authToken);
+        Chat chat = messageService.deleteMessagesByIds(chatId, messageIds, reqUser);
         return ResponseEntity.ok(chatUtils.getChatResponse(chat));
     }
 

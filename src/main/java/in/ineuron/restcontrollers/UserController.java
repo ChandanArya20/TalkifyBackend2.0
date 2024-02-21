@@ -33,19 +33,14 @@ import java.util.Objects;
 public class UserController {
 
     private final UserService userService;
-
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
     @Autowired
     private OTPSenderService otpSender;
-
     @Autowired
     private OTPStorageService otpStorage;
-
     @Autowired
     private TokenStorageService tokenService;
-
     @Autowired
     private UserUtils userUtils;
 

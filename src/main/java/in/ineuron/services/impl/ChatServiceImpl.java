@@ -12,6 +12,7 @@ import in.ineuron.services.ChatService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.UserUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +23,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepo;
     private final UserService userService;
-
     private final UserUtils userUtils;
-
     private final ChatUtils chatUtils;
-
-    public ChatServiceImpl(ChatRepository chatRepo, UserService userService, UserUtils userUtils, ChatUtils chatUtils) {
-        this.chatRepo = chatRepo;
-        this.userService = userService;
-        this.userUtils = userUtils;
-        this.chatUtils = chatUtils;
-    }
 
     @Override
     public Chat createSingleChat(Long reqUserId, Long participantId) {

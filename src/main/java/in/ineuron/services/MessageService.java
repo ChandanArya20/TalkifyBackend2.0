@@ -5,6 +5,7 @@ import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
 
 import java.util.List;
+import java.util.Set;
 
 public interface MessageService {
 
@@ -16,5 +17,7 @@ public interface MessageService {
 
     public Message deleteMessage(Long messageId, Long reqUserId);
 
-    public Chat deleteAllMessagesByChatId(Long chatId, Long reqUser);
+    public Chat deleteAllMessagesByChatId(Long chatId, Long reqUserId);
+
+    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds, Long reqUserId);
 }

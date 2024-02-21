@@ -2,8 +2,6 @@ package in.ineuron.aspect;
 
 import in.ineuron.exception.TokenException;
 import in.ineuron.services.TokenStorageService;
-import in.ineuron.utils.UserUtils;
-;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;

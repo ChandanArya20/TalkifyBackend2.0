@@ -74,9 +74,7 @@
 			<artifactId>twilio</artifactId>
 			<version>8.8.0</version>
 		</dependency>
-
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -93,5 +91,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

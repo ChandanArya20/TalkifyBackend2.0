@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -109,7 +109,7 @@ public class MessageServiceImpl implements MessageService {
             chat.setMessages(messages);
             Chat updatedChat = chatRepo.save(chat);
 
-            // Filter out deleted messages from chat
+            // Filter out deleted messages from chat by reqUser
             List<Message> messagesList = updatedChat.getMessages()
                     .stream()
                     .filter(message -> !message.getDeletedByUsers().contains(user))
@@ -120,4 +120,41 @@ public class MessageServiceImpl implements MessageService {
             return chat;
         }
     }
+
+    @Override
+    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds, Long reqUserId) {
+        Chat chat = chatService.findChatById(chatId);
+        User user = userService.findUserById(reqUserId);
+
+        if (!chat.getMembers().contains(user)) {
+            throw new UserNotAuthorizedException("You are not authorized for this chat with id " + chatId);
+        } else {
+            List<Message> messagesToDelete = msgRepo.findAllById(messageIds);
+
+            // Validate that the provided message IDs belong to the specified chat
+            if (messagesToDelete.stream().anyMatch(message -> !message.getChat().getId().equals(chatId))) {
+                throw new IllegalArgumentException("Invalid message IDs provided for chat with id " + chatId);
+            }
+
+            // Mark all messages as deleted by the user
+            for (Message message : messagesToDelete) {
+                message.getDeletedByUsers().add(user);
+            }
+
+            // Save the modified messages back to the database
+            List<Message> updatedMessages = msgRepo.saveAll(messagesToDelete);
+
+            // Exclude deleted messages from being added to the chat
+            List<Message> nonDeletedMessages = chat.getMessages()
+                    .stream()
+                    .filter(message -> !message.getDeletedByUsers().contains(user))
+                    .toList();
+
+            chat.setMessages(nonDeletedMessages);
+
+            return chat;
+        }
+    }
+
+
 }
