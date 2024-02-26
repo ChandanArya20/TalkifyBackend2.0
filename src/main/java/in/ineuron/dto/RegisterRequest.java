@@ -22,7 +22,13 @@ public class RegisterRequest {
 	@Email(regexp = "^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
 	message="invalid email!")
 	private String email;
-	
+
+	@NotBlank(message = "User id should not be empty or null")
+	@Size(min = 3, message = "Userid should be minimum 3 characters")
+	private String userid;
+
+	private String profileImage;
+
 	@NotBlank(message = "Password should not be empty or null")
     @Pattern(regexp = "^(?!.*\\s).*$",
              message = "Space is not allowed")

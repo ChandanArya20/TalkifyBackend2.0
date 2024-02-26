@@ -1,6 +1,5 @@
 package in.ineuron.services.impl;
 
-import in.ineuron.dto.UserResponse;
 import in.ineuron.dto.UserUpdateRequest;
 import in.ineuron.exception.BadCredentialsException;
 import in.ineuron.exception.UserNotFoundException;
@@ -9,13 +8,10 @@ import in.ineuron.repositories.UserRepository;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.UserUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,6 +91,10 @@ public class UserServiceImpl implements UserService {
         return userRepo.searchUser(query);
     }
 
+    public Optional<User> fetchUserByUserid(String query) {
+        return userRepo.findByUserid(query);
+    }
+
     @Override
     public User updateUser(UserUpdateRequest userToUpdate) {
         User user = findUserById(userToUpdate.getId());
@@ -117,5 +117,7 @@ public class UserServiceImpl implements UserService {
         System.out.println(user);
         return userRepo.save(user);
     }
+
+
 
 }

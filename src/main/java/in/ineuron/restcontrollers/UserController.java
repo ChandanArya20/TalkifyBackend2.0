@@ -3,6 +3,7 @@ package in.ineuron.restcontrollers;
 import in.ineuron.annotation.ValidateRequestData;
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.*;
+import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -139,7 +141,6 @@ public class UserController {
         }
     }
 
-
     @GetMapping("/send-otp")
     public ResponseEntity<String> sendOTPByPhone(@RequestParam("email") String email) throws MessagingException {
 
@@ -184,11 +185,39 @@ public class UserController {
     @ValidateUser
     @PostMapping("/otp-verified/update-password")
     public ResponseEntity<?> UpdateUserPasswordAfterOTPVerified(@CookieValue("otpVerified-token") String authToken, @Valid @RequestBody UpdateUserPasswordDTO userCredential,
-            BindingResult result) {
+            BindingResult result, HttpServletResponse response) {
 
         User user = userService.fetchUserByEmail(userCredential.getEmail());
-        userService.updateUserPassword(user.getId(), passwordEncoder.encode(userCredential.getNewPassword()));
-        return ResponseEntity.ok("Password updated successfully..");
+        user = userService.updateUserPassword(user.getId(), passwordEncoder.encode(userCredential.getNewPassword()));
+
+        UserResponse userResponse = new UserResponse();
+        BeanUtils.copyProperties(user, userResponse);
+
+        String token = tokenService.generateToken(user.getId());
+        Cookie cookie = new Cookie("auth-token", token);    //setting cookie
+        int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
+        cookie.setMaxAge(maxAge);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @GetMapping("/search-userid")
+    public ResponseEntity<Boolean> checkUseridAvailability(@RequestParam String query) {
+
+        if(query.isEmpty()){
+            return ResponseEntity.status(HttpStatus.OK).body(false);
+        }
+
+        Optional<User> userOptional = userService.fetchUserByUserid(query);
+        if(userOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.OK).body(true);
+        }else {
+            return ResponseEntity.status(HttpStatus.OK).body(false);
+//            throw new UserNotFoundException("User not found with userid "+query);
+        }
     }
 
     @ValidateUser

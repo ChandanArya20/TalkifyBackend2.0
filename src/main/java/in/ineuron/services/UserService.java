@@ -7,6 +7,7 @@ import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -29,4 +30,6 @@ public interface UserService {
     public List<User> searchUser(String query);
 
     public User updateUser(UserUpdateRequest userToUpdate);
+
+    public Optional<User> fetchUserByUserid(String query);
 }
