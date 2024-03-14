@@ -1,5 +1,7 @@
 package in.ineuron.restcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.ChatMessageRequest;
 import in.ineuron.dto.ChatResponse;
@@ -7,6 +9,7 @@ import in.ineuron.dto.MessageRequest;
 import in.ineuron.dto.MessageResponse;
 import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
+import in.ineuron.models.MessageType;
 import in.ineuron.models.User;
 import in.ineuron.services.MessageService;
 import in.ineuron.services.TokenStorageService;
@@ -23,7 +26,9 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -39,18 +44,38 @@ public class MessageController {
     private MessageUtils messageUtils;
     private SimpMessagingTemplate messagingTemplate;
     private ChatUtils chatUtils;
+    private ObjectMapper mapper;
 
     @MessageMapping("/message/send")
     public void sendMessage(
-            @Payload MessageRequest msgReq ) {
+            @Payload MessageRequest msgReq ) throws IOException {
 
-        Message message = messageService.sendMessage(msgReq, msgReq.getUserId());
+        Message message = messageService.sendMessage(msgReq, msgReq.getReqUserId());
 
         MessageResponse messageResponse = messageUtils.getMessageResponse(message);
-        System.out.println(messageResponse);
 
         // Send the message to the specific user
         messagingTemplate.convertAndSend("/topic/message"+msgReq.getChatId(), messageResponse);
+    }
+
+    @PostMapping("/send")
+    public ResponseEntity<MessageResponse> sendMessageRestAPI(
+            @RequestParam String msgRequest, @RequestParam MultipartFile mediaFile ) throws IOException {
+
+        // Convert the JSON string to MessageRequest
+        MessageRequest msgRequestData =mapper.readValue(msgRequest, MessageRequest.class);
+        Message message=null;
+
+        if(msgRequestData.getMessageType().equals(MessageType.TEXT)){
+            message = messageService.sendMessage(msgRequestData, msgRequestData.getReqUserId());
+
+        }else {
+            msgRequestData.setMediaFile(mediaFile);
+            message = messageService.sendMessage(msgRequestData, msgRequestData.getReqUserId());
+        }
+
+        MessageResponse messageResponse = messageUtils.getMessageResponse(message);
+        return ResponseEntity.ok(messageResponse);
     }
 
     @MessageMapping("/chat/messages")
@@ -63,6 +88,7 @@ public class MessageController {
     }
 
     @GetMapping("/chat/{chat-id}")
+    @ValidateUser
     public ResponseEntity<List<MessageResponse>> getChatMessagesHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
 
         Long reqUser = tokenService.getUserIdFromToken(authToken);

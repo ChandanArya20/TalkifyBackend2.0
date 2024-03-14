@@ -38,16 +38,5 @@ public class Chat {
     @ManyToMany
     private Set<User> deletedByUsers = new HashSet<>();
 
-    @Override
-    public String toString() {
-        return "Chat{" +
-                "id=" + id +
-                ", chatName='" + chatName + '\'' +
-                ", chatImage='" + chatImage + '\'' +
-                ", isGroup=" + isGroup +
-                ", admins=" + admins +
-                ", createdBy=" + createdBy +
-                ", members=" + members +
-                '}';
-    }
+
 }

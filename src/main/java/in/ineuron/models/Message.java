@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Message {
 
     @Id
@@ -18,7 +19,8 @@ public class Message {
     private Long id;
 
     @Column(nullable = false)
-    private String textMessage;
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
 
     @CreationTimestamp
     private LocalDateTime creationTime;
@@ -37,10 +39,11 @@ public class Message {
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                ", textMessage='" + textMessage + '\'' +
+                ", messageType=" + messageType +
                 ", creationTime=" + creationTime +
                 ", createdBy=" + createdBy +
+//                ", chat-id=" + chat.getId() +
+                ", deletedByUsers=" + deletedByUsers +
                 '}';
     }
-
 }

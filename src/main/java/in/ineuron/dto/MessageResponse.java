@@ -1,6 +1,7 @@
 package in.ineuron.dto;
 
 import in.ineuron.models.Chat;
+import in.ineuron.models.MediaCategory;
 import in.ineuron.models.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +17,13 @@ public class MessageResponse {
 
     private Long id;
 
+    private String messageType;
+
     private String textMessage;
+
+    private String mediaURL;
+
+    private String noteMessage;
 
     private String creationTime;
 

@@ -10,7 +10,6 @@ import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.UserUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +39,7 @@ public class ChatController {
 
     @ValidateUser
     @GetMapping("/{chat-id}")
-    public ResponseEntity<Chat> findChatByIdHandler(@PathVariable("chat-id") Long chatId, HttpServletRequest request) {
+    public ResponseEntity<Chat> findChatByIdHandler(@PathVariable("chat-id") Long chatId) {
 
         Chat chat = chatService.findChatById(chatId);
         return ResponseEntity.ok(chat);

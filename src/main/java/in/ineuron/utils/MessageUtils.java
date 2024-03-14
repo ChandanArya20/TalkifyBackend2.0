@@ -1,10 +1,12 @@
 package in.ineuron.utils;
 
-import in.ineuron.dto.ChatResponse;
 import in.ineuron.dto.MessageResponse;
 import in.ineuron.dto.UserResponse;
-import in.ineuron.models.Chat;
-import in.ineuron.models.Message;
+import in.ineuron.exception.MessageNotFoundException;
+import in.ineuron.models.*;
+import in.ineuron.models.projection.MediaFileProjection;
+import in.ineuron.repositories.MessageRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -12,17 +14,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class MessageUtils {
 
     private final UserUtils userUtils;
-
-    public MessageUtils(UserUtils userUtils) {
-        this.userUtils = userUtils;
-    }
+    private final TalkifyUtils talkifyUtils;
+    private final MessageRepository msgRepo;
 
     public MessageResponse getMessageResponse(Message message){
 
@@ -35,7 +35,19 @@ public class MessageUtils {
 
         messageResponse.setCreatedBy(createdBy);
         messageResponse.setCreationTime(formatTime);
-        messageResponse.setChatId(message.getChat().getId());
+//        messageResponse.setChatId(message.getChat().getId());
+
+        if(message.getMessageType().equals(MessageType.TEXT)){
+            messageResponse.setTextMessage(((TextMessage)message).getMessage());
+            messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
+        } else {
+            MediaFileProjection mediaMessageData = getMediaMessageDataById(message.getId());
+            MediaMessage mediaMessage = (MediaMessage) message;
+
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL()+"/api/media/"+mediaMessageData.getId());
+            messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
+            messageResponse.setMessageType(mediaMessageData.getFileType());
+        }
 
         return messageResponse;
     }
@@ -50,6 +62,11 @@ public class MessageUtils {
             messageResponses.add(messageResponse);
         }
         return messageResponses;
+    }
+
+    public MediaFileProjection getMediaMessageDataById(Long id) {
+        return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
+                ()-> new MessageNotFoundException("MediaMessage not found with id "+id));
     }
 
 }

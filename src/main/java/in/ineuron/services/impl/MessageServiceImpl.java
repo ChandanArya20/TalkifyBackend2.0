@@ -3,20 +3,23 @@ package in.ineuron.services.impl;
 import in.ineuron.dto.MessageRequest;
 import in.ineuron.exception.MessageNotFoundException;
 import in.ineuron.exception.UserNotAuthorizedException;
-import in.ineuron.models.Chat;
-import in.ineuron.models.Message;
-import in.ineuron.models.User;
+import in.ineuron.models.*;
+import in.ineuron.models.projection.MediaFileProjection;
 import in.ineuron.repositories.ChatRepository;
+import in.ineuron.repositories.MediaFileRepository;
 import in.ineuron.repositories.MessageRepository;
 import in.ineuron.services.ChatService;
 import in.ineuron.services.MessageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.MessageUtils;
+import in.ineuron.utils.TalkifyUtils;
 import in.ineuron.utils.UserUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -31,23 +34,56 @@ public class MessageServiceImpl implements MessageService {
     private UserUtils userUtils;
     private MessageUtils messageUtils;
     private ChatRepository chatRepo;
+    MediaFileRepository mediaFileRepository;
+    private TalkifyUtils talkifyUtils;
 
     @Override
-    public Message sendMessage(MessageRequest messReq, Long reqUserId) {
+    public Message sendMessage(MessageRequest messReq, Long reqUserId) throws IOException {
         User reqUser = userService.findUserById(reqUserId);
         Chat chat = chatService.findChatById(messReq.getChatId());
+        Message message = null;
 
-        Message msg = new Message();
-        msg.setCreatedBy(reqUser);
-        msg.setChat(chat);
-        msg.setTextMessage(messReq.getContent());
+        if (messReq.getMessageType().equals(MessageType.TEXT)) {
+            TextMessage txtMsg = new TextMessage();
+            txtMsg.setMessageType(MessageType.TEXT);
+            txtMsg.setMessage(messReq.getTextMessage());
+            txtMsg.setCreatedBy(reqUser);
+            txtMsg.setChat(chat);
+
+            message = txtMsg;
+        } else if (messReq.getMessageType().equals(MessageType.MEDIA)) {
+
+            MediaMessage mediaMsg = new MediaMessage();
+
+            mediaMsg.setMessageType(MessageType.MEDIA);
+
+            // Save the MediaFile entity first
+            MediaFile mediaFile = new MediaFile();
+            MultipartFile fileData = messReq.getMediaFile();
+            mediaFile.setMediaContent(fileData.getBytes());
+            mediaFile.setFileName(fileData.getOriginalFilename());
+            mediaFile.setFileType(fileData.getContentType());
+            mediaFile.setFileSize(fileData.getSize());
+
+            mediaFile = mediaFileRepository.save(mediaFile);
+
+            mediaMsg.setMediaData(mediaFile);
+            mediaMsg.setMediaCategory(talkifyUtils.getMediaCategory(messReq.getMediaFile()));
+
+            if (messReq.getNoteMessage() != null) {
+                mediaMsg.setNoteMessage(messReq.getNoteMessage());
+            }
+            mediaMsg.setCreatedBy(reqUser);
+            mediaMsg.setChat(chat);
+
+            message = mediaMsg;
+        }
 
         // Save the Message entity first
-        Message savedMessage = msgRepo.save(msg);
+        Message savedMessage = msgRepo.save(message);
 
         // Add the saved Message to the Chat's list of messages
         chat.getMessages().add(savedMessage);
-
         // Save the Chat entity
         Chat savedChat = chatRepo.save(chat);
 
@@ -154,6 +190,12 @@ public class MessageServiceImpl implements MessageService {
 
             return chat;
         }
+    }
+
+    @Override
+    public MediaFileProjection getMediaMessageDataById(Long id) {
+        return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
+                ()-> new MessageNotFoundException("MediaMessage not found with id "+id));
     }
 
 

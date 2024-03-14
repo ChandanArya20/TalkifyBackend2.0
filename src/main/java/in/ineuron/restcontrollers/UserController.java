@@ -123,7 +123,7 @@ public class UserController {
 
     @GetMapping("/profile")
     @ValidateUser
-    public ResponseEntity<UserResponse> getLoginUserDetails(@CookieValue("auth-token") String authToken, HttpServletRequest request) {
+    public ResponseEntity<UserResponse> getLoginUserDetails(@CookieValue("auth-token") String authToken) {
 
         Long id = tokenService.getUserIdFromToken(authToken);
         UserResponse userResponse = userUtils.getUserResponse(userService.findUserById(id));
