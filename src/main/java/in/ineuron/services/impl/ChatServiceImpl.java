@@ -7,7 +7,6 @@ import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
 import in.ineuron.models.User;
-import in.ineuron.models.projection.ChatProjection;
 import in.ineuron.repositories.ChatRepository;
 import in.ineuron.services.ChatService;
 import in.ineuron.services.UserService;
@@ -19,12 +18,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -43,15 +40,12 @@ public class ChatServiceImpl implements ChatService {
         User reqUser = userService.findUserById(reqUserId);
         User participantUser = userService.findUserById(participantId);
 
-        Optional<ChatProjection> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
-        if(chatOptional.isPresent()){
-            ChatProjection chatProjection = chatOptional.get();
-
-            Chat chat = new Chat();
-            BeanUtils.copyProperties(chatProjection, chat);
+        Optional<Chat> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
+        if (chatOptional.isPresent()) {
+            Chat chat = chatOptional.get();
 
             //check if user deleted chat previously
-            if(chat.getDeletedByUsers().contains(reqUser)){
+            if (chat.getDeletedByUsers().contains(reqUser)) {
                 chat.getDeletedByUsers().remove(reqUser);
                 return chatRepo.save(chat);
             }
@@ -78,14 +72,13 @@ public class ChatServiceImpl implements ChatService {
     public List<Chat> findAllChatsByUserId(Long userId) {
 
         User user = userService.findUserById(userId);
-        List<ChatProjection> chatProjections = chatRepo.findNonDeletedChatsByUser(user);
-        Collections.reverse(chatProjections);
+        List<Chat> chats = chatRepo.findNonDeletedChatsByUser(user);
+        Collections.reverse(chats);
 
         // Convert projections to entities and filter deleted messages data
-        List<Chat> chats = chatProjections.stream()
-                .map(chatProjection -> {
+        return chats.stream()
+                .map(chat -> {
 
-                    Chat chat = talkifyUtils.getChat(chatProjection);
                     List<Message> messages = chat.getMessages()
                             .stream()
                             .filter(message -> !message.getDeletedByUsers().contains(user))
@@ -94,8 +87,6 @@ public class ChatServiceImpl implements ChatService {
                     return chat;
                 })
                 .collect(Collectors.toList());
-
-        return chats;
     }
 
     @Override
@@ -117,6 +108,7 @@ public class ChatServiceImpl implements ChatService {
 
         return chatRepo.save(group);
     }
+
     @Override
     public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId) {
         Chat chat = findChatById(chatId);

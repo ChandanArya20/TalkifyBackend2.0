@@ -13,7 +13,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     public List<Message> findByChat(Chat chat);
 
-    @Query("SELECT mm.mediaData.id AS id, mm.mediaData.fileType AS fileType FROM MediaMessage mm WHERE mm.id = :messageId")
+    @Query("SELECT mm.mediaData.id AS id, mm.mediaData.fileName AS fileName, mm.mediaData.fileType AS fileType, mm.mediaData.fileSize AS fileSize FROM MediaMessage mm WHERE mm.id = :messageId")
     Optional<MediaFileProjection> findMediaDataAttributesByMessageId(Long messageId);
 
 }

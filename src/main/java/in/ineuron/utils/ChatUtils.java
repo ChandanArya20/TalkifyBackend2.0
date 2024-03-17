@@ -25,7 +25,7 @@ public class ChatUtils {
         UserResponse createdBy = userUtils.getUserResponse(chat.getCreatedBy());
         List<UserResponse> admins = userUtils.getUserResponse(chat.getAdmins());
         List<UserResponse> users = userUtils.getUserResponse(chat.getMembers());
-        List<MessageResponse> messageResponses = messageUtils.getMessageResponse(chat.getMessages());
+        List<MessageResponse> messageResponses = messageUtils.getMessageResponse(chat.getMessages(), chat.getId());
 
         ChatResponse chatResponse = new ChatResponse();
         BeanUtils.copyProperties(chat,chatResponse);

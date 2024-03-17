@@ -24,6 +24,37 @@ public class MessageUtils {
     private final TalkifyUtils talkifyUtils;
     private final MessageRepository msgRepo;
 
+
+    public MessageResponse getMessageResponse(Message message, Long chatId){
+
+        UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
+        LocalTime localTime = message.getCreationTime().toLocalTime();
+        String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
+
+        MessageResponse messageResponse = new MessageResponse();
+        BeanUtils.copyProperties(message,messageResponse);
+
+        messageResponse.setCreatedBy(createdBy);
+        messageResponse.setCreationTime(formatTime);
+        messageResponse.setChatId(chatId);
+
+        if(message.getMessageType().equals(MessageType.TEXT)){
+            messageResponse.setTextMessage(((TextMessage)message).getMessage());
+            messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
+        } else {
+            MediaFileProjection mediaMessageData = getMediaMessageDataById(message.getId());
+            MediaMessage mediaMessage = (MediaMessage) message;
+
+            messageResponse.setMessageType(mediaMessageData.getFileType());
+            messageResponse.setFileName(mediaMessageData.getFileName());
+            messageResponse.setFileSize(mediaMessageData.getFileSize());
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL()+"/api/media/"+mediaMessageData.getId());
+            messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
+        }
+
+        return messageResponse;
+    }
+
     public MessageResponse getMessageResponse(Message message){
 
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
@@ -35,7 +66,7 @@ public class MessageUtils {
 
         messageResponse.setCreatedBy(createdBy);
         messageResponse.setCreationTime(formatTime);
-//        messageResponse.setChatId(message.getChat().getId());
+        messageResponse.setChatId(message.getChat().getId());
 
         if(message.getMessageType().equals(MessageType.TEXT)){
             messageResponse.setTextMessage(((TextMessage)message).getMessage());
@@ -44,12 +75,25 @@ public class MessageUtils {
             MediaFileProjection mediaMessageData = getMediaMessageDataById(message.getId());
             MediaMessage mediaMessage = (MediaMessage) message;
 
+            messageResponse.setMessageType(mediaMessageData.getFileType());
+            messageResponse.setFileName(mediaMessageData.getFileName());
             messageResponse.setMediaURL(talkifyUtils.getBaseURL()+"/api/media/"+mediaMessageData.getId());
             messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
-            messageResponse.setMessageType(mediaMessageData.getFileType());
         }
 
         return messageResponse;
+    }
+
+    public List<MessageResponse> getMessageResponse(Collection<Message> messages, Long chatId){
+
+        List<MessageResponse> messageResponses = new ArrayList<>();
+
+        for(Message message:messages){
+
+            MessageResponse messageResponse = getMessageResponse(message, chatId);
+            messageResponses.add(messageResponse);
+        }
+        return messageResponses;
     }
 
     public List<MessageResponse> getMessageResponse(Collection<Message> messages){

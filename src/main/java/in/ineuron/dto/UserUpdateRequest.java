@@ -10,6 +10,8 @@ public class UserUpdateRequest {
 
     private String name;
 
+    private String userid;
+
     private String email;
 
     private String phone;

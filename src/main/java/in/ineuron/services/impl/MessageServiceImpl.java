@@ -38,52 +38,66 @@ public class MessageServiceImpl implements MessageService {
     private TalkifyUtils talkifyUtils;
 
     @Override
-    public Message sendMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+    public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
         User reqUser = userService.findUserById(reqUserId);
         Chat chat = chatService.findChatById(messReq.getChatId());
         Message message = null;
 
-        if (messReq.getMessageType().equals(MessageType.TEXT)) {
-            TextMessage txtMsg = new TextMessage();
-            txtMsg.setMessageType(MessageType.TEXT);
-            txtMsg.setMessage(messReq.getTextMessage());
-            txtMsg.setCreatedBy(reqUser);
-            txtMsg.setChat(chat);
+        TextMessage txtMsg = new TextMessage();
+        txtMsg.setMessageType(MessageType.TEXT);
+        txtMsg.setMessage(messReq.getTextMessage());
+        txtMsg.setCreatedBy(reqUser);
+        txtMsg.setChat(chat);
 
-            message = txtMsg;
-        } else if (messReq.getMessageType().equals(MessageType.MEDIA)) {
-
-            MediaMessage mediaMsg = new MediaMessage();
-
-            mediaMsg.setMessageType(MessageType.MEDIA);
-
-            // Save the MediaFile entity first
-            MediaFile mediaFile = new MediaFile();
-            MultipartFile fileData = messReq.getMediaFile();
-            mediaFile.setMediaContent(fileData.getBytes());
-            mediaFile.setFileName(fileData.getOriginalFilename());
-            mediaFile.setFileType(fileData.getContentType());
-            mediaFile.setFileSize(fileData.getSize());
-
-            mediaFile = mediaFileRepository.save(mediaFile);
-
-            mediaMsg.setMediaData(mediaFile);
-            mediaMsg.setMediaCategory(talkifyUtils.getMediaCategory(messReq.getMediaFile()));
-
-            if (messReq.getNoteMessage() != null) {
-                mediaMsg.setNoteMessage(messReq.getNoteMessage());
-            }
-            mediaMsg.setCreatedBy(reqUser);
-            mediaMsg.setChat(chat);
-
-            message = mediaMsg;
-        }
+        message = txtMsg;
 
         // Save the Message entity first
         Message savedMessage = msgRepo.save(message);
 
         // Add the saved Message to the Chat's list of messages
         chat.getMessages().add(savedMessage);
+
+        // Save the Chat entity
+        Chat savedChat = chatRepo.save(chat);
+
+        return savedMessage;
+    }
+
+    @Override
+    public Message sendMediaMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+        User reqUser = userService.findUserById(reqUserId);
+        Chat chat = chatService.findChatById(messReq.getChatId());
+        Message message = null;
+
+        MediaMessage mediaMsg = new MediaMessage();
+        mediaMsg.setMessageType(MessageType.MEDIA);
+        // Save the MediaFile entity first
+        MediaFile mediaFile = new MediaFile();
+        MultipartFile fileData = messReq.getMediaFile();
+        mediaFile.setMediaContent(fileData.getBytes());
+        mediaFile.setFileName(fileData.getOriginalFilename());
+        mediaFile.setFileType(fileData.getContentType());
+        mediaFile.setFileSize(fileData.getSize());
+
+        mediaFile = mediaFileRepository.save(mediaFile);
+
+        mediaMsg.setMediaData(mediaFile);
+        mediaMsg.setMediaCategory(talkifyUtils.getMediaCategory(messReq.getMediaFile()));
+
+        if (messReq.getNoteMessage() != null) {
+            mediaMsg.setNoteMessage(messReq.getNoteMessage());
+        }
+        mediaMsg.setCreatedBy(reqUser);
+        mediaMsg.setChat(chat);
+
+        message = mediaMsg;
+
+        // Save the Message entity first
+        Message savedMessage = msgRepo.save(message);
+
+        // Add the saved Message to the Chat's list of messages
+        chat.getMessages().add(savedMessage);
+
         // Save the Chat entity
         Chat savedChat = chatRepo.save(chat);
 

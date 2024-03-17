@@ -102,6 +102,9 @@ public class UserServiceImpl implements UserService {
         if(userToUpdate.getName()!=null)
             user.setName(userToUpdate.getName());
 
+        if(userToUpdate.getUserid()!=null)
+            user.setUserid(userToUpdate.getUserid());
+
         if(userToUpdate.getPhone()!=null)
             user.setPhone(userToUpdate.getPhone());
 

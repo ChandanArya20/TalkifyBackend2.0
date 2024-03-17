@@ -1,6 +1,5 @@
 package in.ineuron.restcontrollers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.ChatMessageRequest;
@@ -10,7 +9,6 @@ import in.ineuron.dto.MessageResponse;
 import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
 import in.ineuron.models.MessageType;
-import in.ineuron.models.User;
 import in.ineuron.services.MessageService;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
@@ -18,11 +16,9 @@ import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.MessageUtils;
 import in.ineuron.utils.UserUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -46,36 +42,42 @@ public class MessageController {
     private ChatUtils chatUtils;
     private ObjectMapper mapper;
 
-    @MessageMapping("/message/send")
-    public void sendMessage(
-            @Payload MessageRequest msgReq ) throws IOException {
-
-        Message message = messageService.sendMessage(msgReq, msgReq.getReqUserId());
-
-        MessageResponse messageResponse = messageUtils.getMessageResponse(message);
-
-        // Send the message to the specific user
-        messagingTemplate.convertAndSend("/topic/message"+msgReq.getChatId(), messageResponse);
-    }
-
     @PostMapping("/send")
+    @ValidateUser
     public ResponseEntity<MessageResponse> sendMessageRestAPI(
-            @RequestParam String msgRequest, @RequestParam MultipartFile mediaFile ) throws IOException {
+            @CookieValue("auth-token") String authToken, @RequestParam String msgRequest, @RequestParam(required = false) MultipartFile mediaFile ) throws IOException {
 
+        Long reqUserId = tokenService.getUserIdFromToken(authToken);
+        System.out.println(mediaFile);
         // Convert the JSON string to MessageRequest
-        MessageRequest msgRequestData =mapper.readValue(msgRequest, MessageRequest.class);
+        MessageRequest msgRequestData = mapper.readValue(msgRequest, MessageRequest.class);
         Message message=null;
 
-        if(msgRequestData.getMessageType().equals(MessageType.TEXT)){
-            message = messageService.sendMessage(msgRequestData, msgRequestData.getReqUserId());
+        if(mediaFile!=null){
+            msgRequestData.setMediaFile(mediaFile);
+            message = messageService.sendMediaMessage(msgRequestData, reqUserId);
 
         }else {
-            msgRequestData.setMediaFile(mediaFile);
-            message = messageService.sendMessage(msgRequestData, msgRequestData.getReqUserId());
+            message = messageService.sendTextMessage(msgRequestData, reqUserId);
         }
 
         MessageResponse messageResponse = messageUtils.getMessageResponse(message);
+//      Send the message to the specific user
+        messagingTemplate.convertAndSend("/topic/message"+messageResponse.getChatId(), messageResponse);
+
         return ResponseEntity.ok(messageResponse);
+    }
+
+    @MessageMapping("/message/send")
+    public void sendMessageWebsocket(
+            @Payload MessageRequest msgRequest ) throws IOException {
+
+        Message message = messageService.sendTextMessage(msgRequest, msgRequest.getReqUserId());
+
+        MessageResponse messageResponse = messageUtils.getMessageResponse(message);
+
+        //Send the message to the specific user
+        messagingTemplate.convertAndSend("/topic/message"+messageResponse.getChatId(), messageResponse);
     }
 
     @MessageMapping("/chat/messages")

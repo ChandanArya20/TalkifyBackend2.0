@@ -21,10 +21,6 @@ public class MessageRequest {
     @NotNull(message = "Chat ID must not be null")
     private Long chatId;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private MessageType messageType; //text, media
-
     private String textMessage;
 
     private  MultipartFile mediaFile;

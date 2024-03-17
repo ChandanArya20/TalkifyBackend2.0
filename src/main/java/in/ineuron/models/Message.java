@@ -28,8 +28,7 @@ public class Message {
     @ManyToOne
     private User createdBy;
 
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     private Chat chat;
 
     @ManyToMany

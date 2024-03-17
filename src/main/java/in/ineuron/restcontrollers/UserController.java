@@ -239,6 +239,8 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUserHandler(@CookieValue("auth-token") String authToken,
                                                  @RequestBody UserUpdateRequest userToUpdate) {
         System.out.println(userToUpdate);
+        Long userId = tokenService.getUserIdFromToken(authToken);
+        userToUpdate.setId(userId);
         User user = userService.updateUser(userToUpdate);
         return ResponseEntity.ok(userUtils.getUserResponse(user));
     }

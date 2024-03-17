@@ -11,7 +11,11 @@ import java.util.Set;
 
 public interface MessageService {
 
-    public Message sendMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+//    public Message sendMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+
+    Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+
+    Message sendMediaMessage(MessageRequest messReq, Long reqUserId) throws IOException;
 
     public List<Message> getChatMessages(Long chatId, Long reqUserId);
 

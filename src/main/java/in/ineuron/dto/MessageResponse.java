@@ -25,6 +25,10 @@ public class MessageResponse {
 
     private String noteMessage;
 
+    private String fileName;
+
+    private Long fileSize;
+
     private String creationTime;
 
     private UserResponse createdBy;
