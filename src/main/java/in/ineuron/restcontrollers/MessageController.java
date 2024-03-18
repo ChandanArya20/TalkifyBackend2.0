@@ -8,7 +8,6 @@ import in.ineuron.dto.MessageRequest;
 import in.ineuron.dto.MessageResponse;
 import in.ineuron.models.Chat;
 import in.ineuron.models.Message;
-import in.ineuron.models.MessageType;
 import in.ineuron.services.MessageService;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
@@ -42,13 +41,14 @@ public class MessageController {
     private ChatUtils chatUtils;
     private ObjectMapper mapper;
 
+    //handles both text and media message to send
     @PostMapping("/send")
     @ValidateUser
     public ResponseEntity<MessageResponse> sendMessageRestAPI(
             @CookieValue("auth-token") String authToken, @RequestParam String msgRequest, @RequestParam(required = false) MultipartFile mediaFile ) throws IOException {
 
         Long reqUserId = tokenService.getUserIdFromToken(authToken);
-        System.out.println(mediaFile);
+
         // Convert the JSON string to MessageRequest
         MessageRequest msgRequestData = mapper.readValue(msgRequest, MessageRequest.class);
         Message message=null;
@@ -68,6 +68,7 @@ public class MessageController {
         return ResponseEntity.ok(messageResponse);
     }
 
+    // Websocket handler to accept text message
     @MessageMapping("/message/send")
     public void sendMessageWebsocket(
             @Payload MessageRequest msgRequest ) throws IOException {
@@ -75,21 +76,21 @@ public class MessageController {
         Message message = messageService.sendTextMessage(msgRequest, msgRequest.getReqUserId());
 
         MessageResponse messageResponse = messageUtils.getMessageResponse(message);
-
         //Send the message to the specific user
         messagingTemplate.convertAndSend("/topic/message"+messageResponse.getChatId(), messageResponse);
     }
 
+    // Websocket handler that returns all messages of a chat by chat id
     @MessageMapping("/chat/messages")
     public void getChatMessages(@Payload ChatMessageRequest req) {
 
         List<Message> messages = messageService.getChatMessages(req.getChatId(), req.getReqUserId());
         List<MessageResponse> messageResponses = messageUtils.getMessageResponse(messages);
-
+        //Send the message to the specific user
         messagingTemplate.convertAndSend("/topic/messages"+req.getChatId(), messageResponses);
     }
 
-    @GetMapping("/chat/{chat-id}")
+    @GetMapping("/{chat-id}")
     @ValidateUser
     public ResponseEntity<List<MessageResponse>> getChatMessagesHandler(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
 
@@ -98,7 +99,7 @@ public class MessageController {
         return ResponseEntity.ok(messageUtils.getMessageResponse(messages));
     }
 
-    @DeleteMapping("/delete-all/chat/{chat-id}")
+    @DeleteMapping("/delete-all/{chat-id}")
     @ValidateUser
     public ResponseEntity<ChatResponse> deleteAllMessages(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId) {
 
@@ -107,7 +108,7 @@ public class MessageController {
         return ResponseEntity.ok(chatUtils.getChatResponse(chat));
     }
 
-    @DeleteMapping("/delete/chat/{chat-id}")
+    @DeleteMapping("/delete/{chat-id}")
     @ValidateUser
     public ResponseEntity<ChatResponse> deleteMessages(@CookieValue("auth-token") String authToken, @PathVariable("chat-id") Long chatId, @RequestBody  Set<Long> messageIds) {
 

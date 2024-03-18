@@ -8,7 +8,8 @@ import in.ineuron.repositories.UserRepository;
 import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.UserUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.Cookie;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,19 +18,12 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
-
-    @Autowired
     private TokenStorageService tokenService;
-
-    @Autowired
     private UserUtils userUtils;
-
-    public UserServiceImpl(UserRepository userRepo) {
-        this.userRepo = userRepo;
-    }
 
     @Override
     public Boolean isUserAvailableByPhone(String phone) {
@@ -41,6 +35,18 @@ public class UserServiceImpl implements UserService {
     public Boolean isUserAvailableByEmail(String email) {
 
         return userRepo.existsByEmail(email);
+    }
+
+    @Override
+    public Cookie getNewCookie(Long userId, String cookieName, int lifeTime) {
+
+        String token = tokenService.generateToken(userId);
+        Cookie cookie = new Cookie(cookieName, token);   //setting cookie
+        int maxAge = lifeTime * 60;  // minutes in seconds
+        cookie.setMaxAge(maxAge);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        return cookie;
     }
 
     @Override
@@ -91,6 +97,7 @@ public class UserServiceImpl implements UserService {
         return userRepo.searchUser(query);
     }
 
+    @Override
     public Optional<User> fetchUserByUserid(String query) {
         return userRepo.findByUserid(query);
     }
@@ -120,7 +127,4 @@ public class UserServiceImpl implements UserService {
         System.out.println(user);
         return userRepo.save(user);
     }
-
-
-
 }

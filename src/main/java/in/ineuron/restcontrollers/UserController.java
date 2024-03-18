@@ -3,7 +3,6 @@ package in.ineuron.restcontrollers;
 import in.ineuron.annotation.ValidateRequestData;
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.*;
-import in.ineuron.exception.UserNotFoundException;
 import in.ineuron.models.User;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
@@ -12,11 +11,10 @@ import in.ineuron.services.UserService;
 import in.ineuron.utils.UserUtils;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,36 +24,26 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@AllArgsConstructor
 //@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
-    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-    @Autowired
     private OTPSenderService otpSender;
-    @Autowired
     private OTPStorageService otpStorage;
-    @Autowired
     private TokenStorageService tokenService;
-    @Autowired
     private UserUtils userUtils;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     // Endpoint for registering a new user
     @PostMapping("/register")
     @ValidateRequestData
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest requestData, BindingResult result, HttpServletResponse response) {
 
-        System.out.println(requestData);
         // Check if the email is already registered
         if (userService.isUserAvailableByEmail(requestData.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already registered with another account");
@@ -70,14 +58,8 @@ public class UserController {
 
             // Register the user in the system
             User regUser = userService.registerUser(user);
-
-            String token = tokenService.generateToken(user.getId());
-            Cookie cookie = new Cookie("auth-token", token);   //setting cookie
-            int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
-            cookie.setMaxAge(maxAge);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            //setting cookie for validation
+            response.addCookie(userService.getNewCookie(regUser.getId(),"auth-token", 7*24*60)); // 7 days lifetime for cookie
 
             return ResponseEntity.ok(userUtils.getUserResponse(regUser));
         }
@@ -96,15 +78,7 @@ public class UserController {
             UserResponse userResponse = new UserResponse();
             BeanUtils.copyProperties(user, userResponse);
 
-            String token = tokenService.generateToken(user.getId());
-            Cookie cookie = new Cookie("auth-token", token);    //setting cookie
-            int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
-            cookie.setMaxAge(maxAge);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            response.addCookie(cookie);
-
-
+            response.addCookie(userService.getNewCookie(user.getId(),"auth-token", 7*24*60)); // 7 days lifetime for cookie
             return ResponseEntity.ok(userResponse);
         }
     }
@@ -168,13 +142,7 @@ public class UserController {
             otpStorage.removeOTP(email);
 
             //setting token for authorized user who wants to change password
-            String token = tokenService.generateToken(null);
-            Cookie cookie = new Cookie("otpVerified-token", token);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            int maxAge = 5 * 60;  // 5 minutes in seconds
-            cookie.setMaxAge(maxAge);
-            response.addCookie(cookie);
+            response.addCookie(userService.getNewCookie(null,"otpVerified-token", 5 * 60)); // 5 minutes in seconds
 
             return ResponseEntity.ok("verified successfully.. ");
         } else {
@@ -193,14 +161,7 @@ public class UserController {
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse);
 
-        String token = tokenService.generateToken(user.getId());
-        Cookie cookie = new Cookie("auth-token", token);    //setting cookie
-        int maxAge = 7 * 24 * 60 * 60;  // 7 days in seconds
-        cookie.setMaxAge(maxAge);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
+        response.addCookie(userService.getNewCookie(user.getId(),"auth-token", 7*24*60)); // 7 days lifetime for cookie
         return ResponseEntity.ok(userResponse);
     }
 
@@ -216,7 +177,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(true);
         }else {
             return ResponseEntity.status(HttpStatus.OK).body(false);
-//            throw new UserNotFoundException("User not found with userid "+query);
         }
     }
 
@@ -230,6 +190,7 @@ public class UserController {
 
         User reqUser = userService.fetchUserByAuthToken(authToken);
         List<User> users = userService.searchUser(query);
+        //Removes the logged user from list
         users=users.stream().filter(user-> user.getId() != reqUser.getId()).toList();
         return ResponseEntity.status(HttpStatus.OK).body(userUtils.getUserResponse(users));
     }
@@ -238,21 +199,12 @@ public class UserController {
     @ValidateUser
     public ResponseEntity<UserResponse> updateUserHandler(@CookieValue("auth-token") String authToken,
                                                  @RequestBody UserUpdateRequest userToUpdate) {
-        System.out.println(userToUpdate);
+
         Long userId = tokenService.getUserIdFromToken(authToken);
         userToUpdate.setId(userId);
+        //updates user data in db
         User user = userService.updateUser(userToUpdate);
         return ResponseEntity.ok(userUtils.getUserResponse(user));
-    }
-
-    @GetMapping("/test-cookie")
-    public ResponseEntity<String> someOtherEndpoint(@CookieValue("auth-token") String authToken) {
-
-        if (tokenService.isValidToken(authToken)) {
-            return ResponseEntity.ok("Valid token");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is expired");
-        }
     }
 
 }

@@ -14,7 +14,6 @@ import in.ineuron.utils.ChatUtils;
 import in.ineuron.utils.TalkifyUtils;
 import in.ineuron.utils.UserUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,7 @@ public class ChatServiceImpl implements ChatService {
     private final UserService userService;
     private final UserUtils userUtils;
     private final ChatUtils chatUtils;
-    private TalkifyUtils talkifyUtils;
+    private final TalkifyUtils talkifyUtils;
 
     @Override
     public Chat createSingleChat(Long reqUserId, Long participantId) {
@@ -44,7 +43,7 @@ public class ChatServiceImpl implements ChatService {
         if (chatOptional.isPresent()) {
             Chat chat = chatOptional.get();
 
-            //check if user deleted chat previously
+            // Check if user deleted chat previously
             if (chat.getDeletedByUsers().contains(reqUser)) {
                 chat.getDeletedByUsers().remove(reqUser);
                 return chatRepo.save(chat);
@@ -52,13 +51,14 @@ public class ChatServiceImpl implements ChatService {
             return chat;
         }
 
+        // Create new chat for single conversation
         Chat newChat = new Chat();
         newChat.setCreatedBy(reqUser);
         newChat.getMembers().add(reqUser);
         newChat.getMembers().add(participantUser);
         newChat.setIsGroup(false);
 
-        return chatRepo.save(newChat);  //saving to database
+        return chatRepo.save(newChat);  // Saving to database
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ChatServiceImpl implements ChatService {
         List<Chat> chats = chatRepo.findNonDeletedChatsByUser(user);
         Collections.reverse(chats);
 
-        // Convert projections to entities and filter deleted messages data
+        // filter deleted messages data from every chat
         return chats.stream()
                 .map(chat -> {
 
@@ -111,6 +111,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId) {
+
         Chat chat = findChatById(chatId);
         User reqUser = userService.findUserById(reqUserId);
         User user = userService.findUserById(userId);
@@ -141,12 +142,16 @@ public class ChatServiceImpl implements ChatService {
     public Chat removeUserFromGroup(Long chatId, Long userId, Long reqUserId) {
 
         Chat chat = findChatById(chatId);
+        // Find the user who requested the removal
         User reqUser = userService.findUserById(reqUserId);
+        // Find the user to be removed from the group
         User user = userService.findUserById(userId);
 
+        // Check if the requester is an admin of the group
         if (chat.getAdmins().contains(reqUser)) {
             chat.getAdmins().remove(user);
         } else if (chat.getMembers().contains(reqUser)) {
+            // If the requester is not an admin but a member of the group
             if (userId.equals(reqUserId)) {
                 chat.getMembers().remove(user);
             } else {
@@ -155,18 +160,23 @@ public class ChatServiceImpl implements ChatService {
         } else {
             throw new UserNotAuthorizedException("User not found in the chat");
         }
+
         return chat;
     }
 
     @Override
     public Chat deleteChat(Long chatId, Long userId) {
+
         Chat chat = findChatById(chatId);
+        // Find the user who requested the deletion
         User user = userService.findUserById(userId);
 
+        // Check if the chat is a group chat and if the user is an admin
         if (chat.getIsGroup() && !chat.getAdmins().contains(user)) {
             throw new UserNotAuthorizedException("Only admins are allowed to delete the group chat");
         }
 
+        // Check if the user is a member of the chat
         if (!chat.getMembers().contains(user)) {
             throw new UserNotFoundException("User not found in the chat");
         }
@@ -179,7 +189,9 @@ public class ChatServiceImpl implements ChatService {
         // Mark chat as deleted by the user
         chat.getDeletedByUsers().add(user);
 
+        // Save the changes to the chat in the repository and return the updated chat
         return chatRepo.save(chat);
     }
+
 
 }

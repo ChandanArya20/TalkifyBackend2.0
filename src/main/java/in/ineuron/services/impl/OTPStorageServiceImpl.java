@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 public class OTPStorageServiceImpl implements OTPStorageService {
     private static final long CLEANUP_INTERVAL_MINUTES = 1;
     private static final long OTP_EXPIRY_DURATION_MILLIS = 600_000; // 10 minutes
-
     private final Map<String, OTPEntry> otpMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 

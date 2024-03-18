@@ -39,10 +39,15 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+
+        // Find the user who sent the message
         User reqUser = userService.findUserById(reqUserId);
+
+        // Find the chat where the message is being sent
         Chat chat = chatService.findChatById(messReq.getChatId());
         Message message = null;
 
+        // Create a text message entity
         TextMessage txtMsg = new TextMessage();
         txtMsg.setMessageType(MessageType.TEXT);
         txtMsg.setMessage(messReq.getTextMessage());
@@ -65,12 +70,17 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message sendMediaMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+        // Find the user who sent the message
         User reqUser = userService.findUserById(reqUserId);
+
+        // Find the chat where the message is being sent
         Chat chat = chatService.findChatById(messReq.getChatId());
         Message message = null;
 
+        // Create a media message entity
         MediaMessage mediaMsg = new MediaMessage();
         mediaMsg.setMessageType(MessageType.MEDIA);
+
         // Save the MediaFile entity first
         MediaFile mediaFile = new MediaFile();
         MultipartFile fileData = messReq.getMediaFile();
@@ -81,9 +91,11 @@ public class MessageServiceImpl implements MessageService {
 
         mediaFile = mediaFileRepository.save(mediaFile);
 
+        // Set media data and category for the media message
         mediaMsg.setMediaData(mediaFile);
         mediaMsg.setMediaCategory(talkifyUtils.getMediaCategory(messReq.getMediaFile()));
 
+        // Set note message if provided
         if (messReq.getNoteMessage() != null) {
             mediaMsg.setNoteMessage(messReq.getNoteMessage());
         }
@@ -108,18 +120,22 @@ public class MessageServiceImpl implements MessageService {
     public List<Message> getChatMessages(Long chatId, Long reqUserId) {
 
         Chat chat = chatService.findChatById(chatId);
+        // Find the user who requested the chat messages
         User user = userService.findUserById(reqUserId);
 
-        if(!chat.getMembers().contains(user)){
-            throw new UserNotAuthorizedException("You are not authorized for this chat with id "+chatId);
-        }else {
+        // Check if the user is a member of the chat
+        if (!chat.getMembers().contains(user)) {
+            throw new UserNotAuthorizedException("You are not authorized for this chat with id " + chatId);
+        } else {
             List<Message> messages = msgRepo.findByChat(chatService.findChatById(chatId));
+
+            // Filter out deleted messages for the requesting user
             return messages.stream()
                     .filter(message -> !message.getDeletedByUsers().contains(user))
                     .toList();
-
         }
     }
+
 
     @Override
     public Message findMessageById(Long messageId) {
@@ -130,14 +146,18 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message deleteMessage(Long messageId, Long reqUserId) {
+
         Message msg = findMessageById(messageId);
+        // Find the user who requested the deletion
         User user = userService.findUserById(reqUserId);
 
-        if(msg.getCreatedBy().getId().equals(messageId)){
+        // Check if the user is the creator of the message
+        if (msg.getCreatedBy().getId().equals(messageId)) {
+            // If the user is authorized to delete the message, mark it as deleted
             msg.getDeletedByUsers().add(user);
             return msgRepo.save(msg);
-        }else {
-            throw new UserNotAuthorizedException("You are not authorized for this message with id "+messageId);
+        } else {
+            throw new UserNotAuthorizedException("You are not authorized for this message with id " + messageId);
         }
     }
 

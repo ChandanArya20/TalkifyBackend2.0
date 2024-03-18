@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 public class TokenStorageServiceImpl implements TokenStorageService {
     private static final long CLEANUP_INTERVAL_MINUTES = 1;
     private static final long TOKEN_EXPIRY_DURATION_MILLIS = 7 * 24 * 60 * 60 * 1000; // 7 days milliseconds
-
     private final Map<String, TokenInfo> tokenMap = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 

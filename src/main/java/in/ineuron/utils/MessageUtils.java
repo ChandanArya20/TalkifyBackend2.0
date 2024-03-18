@@ -24,24 +24,31 @@ public class MessageUtils {
     private final TalkifyUtils talkifyUtils;
     private final MessageRepository msgRepo;
 
-
+    // Method to generate MessageResponse object from Message entity and chatId
     public MessageResponse getMessageResponse(Message message, Long chatId){
 
+        // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
+
+        // Format creation time
         LocalTime localTime = message.getCreationTime().toLocalTime();
         String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
 
+        // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message,messageResponse);
 
+        // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
         messageResponse.setCreationTime(formatTime);
         messageResponse.setChatId(chatId);
 
+        // Set message specific properties based on message type
         if(message.getMessageType().equals(MessageType.TEXT)){
             messageResponse.setTextMessage(((TextMessage)message).getMessage());
             messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
         } else {
+            // For media messages, fetch media message data and set relevant properties
             MediaFileProjection mediaMessageData = getMediaMessageDataById(message.getId());
             MediaMessage mediaMessage = (MediaMessage) message;
 
@@ -55,23 +62,31 @@ public class MessageUtils {
         return messageResponse;
     }
 
+    // Overloaded method to generate MessageResponse object without chatId
     public MessageResponse getMessageResponse(Message message){
 
+        // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
+
+        // Format creation time
         LocalTime localTime = message.getCreationTime().toLocalTime();
         String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
 
+        // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message,messageResponse);
 
+        // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
         messageResponse.setCreationTime(formatTime);
         messageResponse.setChatId(message.getChat().getId());
 
+        // Set message specific properties based on message type
         if(message.getMessageType().equals(MessageType.TEXT)){
             messageResponse.setTextMessage(((TextMessage)message).getMessage());
             messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
         } else {
+            // For media messages, fetch media message data and set relevant properties
             MediaFileProjection mediaMessageData = getMediaMessageDataById(message.getId());
             MediaMessage mediaMessage = (MediaMessage) message;
 
@@ -84,6 +99,7 @@ public class MessageUtils {
         return messageResponse;
     }
 
+    // Method to generate list of MessageResponse objects from collection of Message entities with chatId
     public List<MessageResponse> getMessageResponse(Collection<Message> messages, Long chatId){
 
         List<MessageResponse> messageResponses = new ArrayList<>();
@@ -96,6 +112,7 @@ public class MessageUtils {
         return messageResponses;
     }
 
+    // Overloaded method to generate list of MessageResponse objects without chatId
     public List<MessageResponse> getMessageResponse(Collection<Message> messages){
 
         List<MessageResponse> messageResponses = new ArrayList<>();
@@ -108,6 +125,7 @@ public class MessageUtils {
         return messageResponses;
     }
 
+    // Method to fetch media message data by message ID
     public MediaFileProjection getMediaMessageDataById(Long id) {
         return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
                 ()-> new MessageNotFoundException("MediaMessage not found with id "+id));

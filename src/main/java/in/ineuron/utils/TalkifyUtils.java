@@ -2,14 +2,15 @@ package in.ineuron.utils;
 
 import in.ineuron.models.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
+@AllArgsConstructor
 public class TalkifyUtils {
 
-    @Autowired
     private HttpServletRequest request;
 
     public String getBaseURL(){
