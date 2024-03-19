@@ -116,4 +116,5 @@ Happy Reading and Shopping!
 ## Developer 
 - **Chandan Kumar**
 - **E-mail**: chandank1848@gmail.com
+- **Linkedin**: www.linkedin.com/in/chandan2002
 - **Github**: https://github.com/ChandanArya20
