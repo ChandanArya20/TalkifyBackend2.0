@@ -41,7 +41,7 @@ Before you begin, ensure you have met the following requirements:
    git clone https://github.com/ChandanArya20/TalkifyBackend2.0.git
    ```
    
-2. If you want you can refer 'Frontend Repository' as well:
+2. For better understanding you can refer 'Frontend Repository' as well:
   
    Github : https://github.com/ChandanArya20/talkify-frontend2.0.git
    
