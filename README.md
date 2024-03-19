@@ -38,11 +38,16 @@ Before you begin, ensure you have met the following requirements:
 1. Clone the repository:
 
    ```shell
-   git clone https://github.com/ChandanArya20/E-Commerece-bookbazaarApp.git
+   git clone https://github.com/ChandanArya20/TalkifyBackend2.0.git
    ```
-2. Now import this spring boot project in IDE and you are good to go
    
-3. Use IDE to further build and run this project
+2. If you want you can refer 'Frontend Repository' as well:
+  
+   Github : https://github.com/ChandanArya20/talkify-frontend2.0.git
+   
+4. Now import this spring boot project in IDE and you are good to go
+   
+5. Use IDE to further build and run this project
 
 ## API Documentation
 For API documentation, you can access the Swagger UI provided by the application. Here are the links:
