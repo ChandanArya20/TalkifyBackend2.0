@@ -1,6 +1,7 @@
 # Talkify Backend - A Realtime Chat App
 
-This is the backend service for the E-Commerce Bookstore application. It is developed using Spring Boot and serves as the backbone of the bookstore application.
+Welcome to the Takify backend service! This service powers the Takify real-time chat application, providing essential functionality and managing the database interactions.
+It is developed using Spring Boot and serves as the backbone of Takify real-time chat application.
 It provides a lot of API to handle HTTP request and also manage databse.
 
 ## Live Demo
@@ -12,7 +13,6 @@ Frontend App Link: https://booksbazaar.netlify.app/
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-- [Usage](#usage)
 - [API Documentation](#api-documentation)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
@@ -44,46 +44,8 @@ Before you begin, ensure you have met the following requirements:
    
 3. Use IDE to further build and run this project
 
-
-## Usage
-- User Registration:
-
-Endpoint: /api/register
-
-Method: POST
-
-Description: Register a new user.
-
-Example Request:
-
-{
-
-  "name": "Chandan Kumar",
-  
-  "phone": 99056xxxxx,
-  
-  "email": "chandank1848@gmail.com"
-
-  "password": "20002ckc+"
-  
-}
-
-
-- Get All Books:
-
-Endpoint: /api/book/seller/{seller_id}/all-books
-
-Method: GET
-
-Description: Get a list of all books available in the bookstore of a seller.
-
-Example Response:
-
-/api/book/seller/10/all-books
-
-
 ## API Documentation
-For API documentation, You can access through swagger link because this application is configured with swagger I have provided two links the first one is for only when this project is running on local machine and the second live link you can use to just see a demo of the api documentation which is live because this project is deployed somewhere, go and visite and have a look
+For API documentation, you can access the Swagger UI provided by the application. Here are the links:
 
 Local Link : http://localhost:8080/swagger-ui.html
 
@@ -98,20 +60,19 @@ Note : You can change the host name in local link as per your requirement and ne
 - This project includes different properties file for different enviroment so by default it will start in development enviroment but if you put 'ENV=prod' in application.properties file that time production enviroment will start to running
 
 ## Future Enhancements
-- Wishlist Feature
-- Review and Rating System
-- Discount system
-- Payment System
+- User Online/Offline Status
+- Message read receipts (like sent, recieved or seen) 
+- Audio/Video call facilities
 
 ## Contributing
-If you would like to contribute to the project, please follow the guidelines in CONTRIBUTING.md.
+If you'd like to contribute to the project, please follow the guidelines outlined in CONTRIBUTING.md.
 
 ## License
-This project is licensed under the public License - use the project for your on purpose.
+This project is licensed under the MIT License - feel free to use it for your own purposes.
 
-Thank you for using our eCommerce Bookstore project! If you have any questions or encounter any issues, please don't hesitate to contact us. You can find contact info in developer section.
+Thank you for using our Takify backend service! If you have any questions or encounter any issues, please don't hesitate to contact us. You can find contact information in the developer section below.
 
-Happy Reading and Shopping!
+Happy Chatting!
 
 ## Developer 
 - **Chandan Kumar**
