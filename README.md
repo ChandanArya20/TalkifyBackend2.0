@@ -6,7 +6,7 @@ It provides a lot of API to handle HTTP request and also manage databse.
 
 ## Live Demo
 
-    Frontend App Live Link: https://talkifychat.netlify.app/
+Frontend App Live Link: https://talkifychat.netlify.app/
 
 ## Table of Contents
 
