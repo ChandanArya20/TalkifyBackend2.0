@@ -2,6 +2,7 @@ package in.ineuron.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ public class Chat {
     private String chatImage;
 
     private Boolean isGroup;
+
+    @CreationTimestamp
+    private LocalDateTime creationTime;
 
     @ManyToMany
     private Set<User> admins=new HashSet<>();

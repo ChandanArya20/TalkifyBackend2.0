@@ -4,6 +4,7 @@ import in.ineuron.models.Message;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,8 @@ public class ChatResponse {
     private String chatImage;
 
     private Boolean isGroup;
+
+    private LocalDateTime creationTime;
 
     private Set<UserResponse> admins=new HashSet<>();
 
