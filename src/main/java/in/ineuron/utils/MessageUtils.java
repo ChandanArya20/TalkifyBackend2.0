@@ -1,13 +1,18 @@
 package in.ineuron.utils;
 
+import in.ineuron.constant.ErrorConstant;
+import in.ineuron.constant.MessageType;
 import in.ineuron.dto.MessageResponse;
 import in.ineuron.dto.UserResponse;
-import in.ineuron.exception.MessageNotFoundException;
-import in.ineuron.models.*;
+import in.ineuron.exception.MessageException;
+import in.ineuron.models.MediaMessage;
+import in.ineuron.models.Message;
+import in.ineuron.models.TextMessage;
 import in.ineuron.models.projection.MediaFileProjection;
 import in.ineuron.repositories.MessageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
@@ -25,7 +30,7 @@ public class MessageUtils {
     private final MessageRepository msgRepo;
 
     // Method to generate MessageResponse object from Message entity and chatId
-    public MessageResponse getMessageResponse(Message message, Long chatId){
+    public MessageResponse getMessageResponse(Message message, Long chatId) {
 
         // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
@@ -36,7 +41,7 @@ public class MessageUtils {
 
         // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
-        BeanUtils.copyProperties(message,messageResponse);
+        BeanUtils.copyProperties(message, messageResponse);
 
         // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
@@ -44,8 +49,8 @@ public class MessageUtils {
         messageResponse.setChatId(chatId);
 
         // Set message specific properties based on message type
-        if(message.getMessageType().equals(MessageType.TEXT)){
-            messageResponse.setTextMessage(((TextMessage)message).getMessage());
+        if (message.getMessageType().equals(MessageType.TEXT)) {
+            messageResponse.setTextMessage(((TextMessage) message).getMessage());
             messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
         } else {
             // For media messages, fetch media message data and set relevant properties
@@ -55,7 +60,7 @@ public class MessageUtils {
             messageResponse.setMessageType(mediaMessageData.getFileType());
             messageResponse.setFileName(mediaMessageData.getFileName());
             messageResponse.setFileSize(mediaMessageData.getFileSize());
-            messageResponse.setMediaURL(talkifyUtils.getBaseURL()+"/api/media/"+mediaMessageData.getId());
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId());
             messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
         }
 
@@ -63,7 +68,7 @@ public class MessageUtils {
     }
 
     // Overloaded method to generate MessageResponse object without chatId
-    public MessageResponse getMessageResponse(Message message){
+    public MessageResponse getMessageResponse(Message message) {
 
         // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
@@ -74,7 +79,7 @@ public class MessageUtils {
 
         // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
-        BeanUtils.copyProperties(message,messageResponse);
+        BeanUtils.copyProperties(message, messageResponse);
 
         // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
@@ -82,8 +87,8 @@ public class MessageUtils {
         messageResponse.setChatId(message.getChat().getId());
 
         // Set message specific properties based on message type
-        if(message.getMessageType().equals(MessageType.TEXT)){
-            messageResponse.setTextMessage(((TextMessage)message).getMessage());
+        if (message.getMessageType().equals(MessageType.TEXT)) {
+            messageResponse.setTextMessage(((TextMessage) message).getMessage());
             messageResponse.setMessageType(String.valueOf(MessageType.TEXT));
         } else {
             // For media messages, fetch media message data and set relevant properties
@@ -92,7 +97,7 @@ public class MessageUtils {
 
             messageResponse.setMessageType(mediaMessageData.getFileType());
             messageResponse.setFileName(mediaMessageData.getFileName());
-            messageResponse.setMediaURL(talkifyUtils.getBaseURL()+"/api/media/"+mediaMessageData.getId());
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId());
             messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
         }
 
@@ -100,11 +105,11 @@ public class MessageUtils {
     }
 
     // Method to generate list of MessageResponse objects from collection of Message entities with chatId
-    public List<MessageResponse> getMessageResponse(Collection<Message> messages, Long chatId){
+    public List<MessageResponse> getMessageResponse(Collection<Message> messages, Long chatId) {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
 
-        for(Message message:messages){
+        for (Message message : messages) {
 
             MessageResponse messageResponse = getMessageResponse(message, chatId);
             messageResponses.add(messageResponse);
@@ -113,11 +118,11 @@ public class MessageUtils {
     }
 
     // Overloaded method to generate list of MessageResponse objects without chatId
-    public List<MessageResponse> getMessageResponse(Collection<Message> messages){
+    public List<MessageResponse> getMessageResponse(Collection<Message> messages) {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
 
-        for(Message message:messages){
+        for (Message message : messages) {
 
             MessageResponse messageResponse = getMessageResponse(message);
             messageResponses.add(messageResponse);
@@ -128,7 +133,11 @@ public class MessageUtils {
     // Method to fetch media message data by message ID
     public MediaFileProjection getMediaMessageDataById(Long id) {
         return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
-                ()-> new MessageNotFoundException("MediaMessage not found with id "+id));
+                () -> new MessageException(
+                        ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorCode(),
+                        ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorMessage() + " : with id " + id,
+                        HttpStatus.NOT_FOUND
+                ));
     }
 
 }

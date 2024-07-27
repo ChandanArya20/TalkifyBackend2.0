@@ -27,5 +27,4 @@ public interface MessageService {
 
     public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds, Long reqUserId);
 
-    public MediaFileProjection getMediaMessageDataById(Long id);
 }

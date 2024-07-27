@@ -1,4 +1,4 @@
-package in.ineuron.models;
+package in.ineuron.constant;
 
 public enum MediaCategory {
     AUDIO,

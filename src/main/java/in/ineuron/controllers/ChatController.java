@@ -1,4 +1,4 @@
-package in.ineuron.restcontrollers;
+package in.ineuron.controllers;
 
 import in.ineuron.annotation.ValidateUser;
 import in.ineuron.dto.ChatResponse;

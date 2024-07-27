@@ -1,4 +1,4 @@
-package in.ineuron.restcontrollers;
+package in.ineuron.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.ineuron.annotation.ValidateUser;

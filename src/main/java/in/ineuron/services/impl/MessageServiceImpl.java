@@ -1,8 +1,10 @@
 package in.ineuron.services.impl;
 
+import in.ineuron.constant.ErrorConstant;
+import in.ineuron.constant.MessageType;
 import in.ineuron.dto.MessageRequest;
-import in.ineuron.exception.MessageNotFoundException;
-import in.ineuron.exception.UserNotAuthorizedException;
+import in.ineuron.exception.MessageException;
+import in.ineuron.exception.UserException;
 import in.ineuron.models.*;
 import in.ineuron.models.projection.MediaFileProjection;
 import in.ineuron.repositories.ChatRepository;
@@ -15,6 +17,7 @@ import in.ineuron.utils.MessageUtils;
 import in.ineuron.utils.TalkifyUtils;
 import in.ineuron.utils.UserUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,13 +31,13 @@ import java.util.Set;
 @AllArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
+    MediaFileRepository mediaFileRepository;
     private MessageRepository msgRepo;
     private UserService userService;
     private ChatService chatService;
     private UserUtils userUtils;
     private MessageUtils messageUtils;
     private ChatRepository chatRepo;
-    MediaFileRepository mediaFileRepository;
     private TalkifyUtils talkifyUtils;
 
     @Override
@@ -125,7 +128,11 @@ public class MessageServiceImpl implements MessageService {
 
         // Check if the user is a member of the chat
         if (!chat.getMembers().contains(user)) {
-            throw new UserNotAuthorizedException("You are not authorized for this chat with id " + chatId);
+            throw new UserException(
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorCode(),
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorMessage() + " : You are not authorized for this chat with id " + chatId,
+                    HttpStatus.UNAUTHORIZED
+            );
         } else {
             List<Message> messages = msgRepo.findByChat(chatService.findChatById(chatId));
 
@@ -140,8 +147,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message findMessageById(Long messageId) {
         return msgRepo.findById(messageId).orElseThrow(
-                ()->new MessageNotFoundException("Message not found with id "+messageId)
-        );
+                () -> new MessageException(
+                        ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorCode(),
+                        ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorMessage() + " : with id " + messageId,
+                        HttpStatus.NOT_FOUND
+                ));
     }
 
     @Override
@@ -157,7 +167,11 @@ public class MessageServiceImpl implements MessageService {
             msg.getDeletedByUsers().add(user);
             return msgRepo.save(msg);
         } else {
-            throw new UserNotAuthorizedException("You are not authorized for this message with id " + messageId);
+            throw new UserException(
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorCode(),
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorMessage() + " : You are not authorized for this message with id " + messageId,
+                    HttpStatus.UNAUTHORIZED
+            );
         }
     }
 
@@ -167,9 +181,13 @@ public class MessageServiceImpl implements MessageService {
         Chat chat = chatService.findChatById(chatId);
         User user = userService.findUserById(reqUserId);
 
-        if(!chat.getMembers().contains(user)){
-            throw new UserNotAuthorizedException("You are not authorized for this chat with id "+chatId);
-        }else {
+        if (!chat.getMembers().contains(user)) {
+            throw new UserException(
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorCode(),
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorMessage() + " : You are not authorized for this chat with id " + chatId,
+                    HttpStatus.UNAUTHORIZED
+            );
+        } else {
             List<Message> messages = msgRepo.findByChat(chatService.findChatById(chatId));
 
             // Delete messages associated with the chat
@@ -197,7 +215,11 @@ public class MessageServiceImpl implements MessageService {
         User user = userService.findUserById(reqUserId);
 
         if (!chat.getMembers().contains(user)) {
-            throw new UserNotAuthorizedException("You are not authorized for this chat with id " + chatId);
+            throw new UserException(
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorCode(),
+                    ErrorConstant.USER_NOT_AUTHORIZED_ERROR.getErrorMessage() + " : You are not authorized for this chat with id " + chatId,
+                    HttpStatus.UNAUTHORIZED
+            );
         } else {
             List<Message> messagesToDelete = msgRepo.findAllById(messageIds);
 
@@ -225,12 +247,5 @@ public class MessageServiceImpl implements MessageService {
             return chat;
         }
     }
-
-    @Override
-    public MediaFileProjection getMediaMessageDataById(Long id) {
-        return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
-                ()-> new MessageNotFoundException("MediaMessage not found with id "+id));
-    }
-
 
 }

@@ -1,7 +1,7 @@
 package in.ineuron.models;
 
+import in.ineuron.constant.MediaCategory;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

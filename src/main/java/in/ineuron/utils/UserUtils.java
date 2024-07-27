@@ -1,5 +1,6 @@
 package in.ineuron.utils;
 
+import in.ineuron.constant.ErrorConstant;
 import in.ineuron.dto.UserResponse;
 import in.ineuron.exception.BadCredentialsException;
 import in.ineuron.exception.TokenException;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -56,16 +58,24 @@ public class UserUtils {
                 }
             }
         }
-        throw new TokenException("OTP-Token not found with request");
+        throw new TokenException(
+                ErrorConstant.TOKEN_NOT_FOUND_ERROR.getErrorCode(),
+                ErrorConstant.TOKEN_NOT_FOUND_ERROR.getErrorMessage()+" : OTP-Token not found with request",
+                HttpStatus.UNAUTHORIZED
+        );
     }
 
     // Method to validate OTP authentication token
-    public boolean validateOTPAuthToken(HttpServletRequest request) throws BadCredentialsException {
+    public boolean validateOTPAuthToken(HttpServletRequest request) {
 
         String otpAuthToken = getOTPAuthToken(request);
 
         if(otpAuthToken==null){
-            throw new BadCredentialsException("Token not found with request");
+            throw new TokenException(
+                    ErrorConstant.TOKEN_NOT_FOUND_ERROR.getErrorCode(),
+                    ErrorConstant.TOKEN_NOT_FOUND_ERROR.getErrorMessage(),
+                    HttpStatus.UNAUTHORIZED
+            );
         }
         return tokenService.isValidToken(otpAuthToken);
     }

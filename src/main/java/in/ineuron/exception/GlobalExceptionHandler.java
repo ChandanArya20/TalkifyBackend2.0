@@ -1,5 +1,6 @@
 package in.ineuron.exception;
 
+import in.ineuron.constant.ErrorConstant;
 import in.ineuron.dto.ErrorDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -13,53 +14,56 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorDetails> userExceptionHandler(UserNotFoundException exception){
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ErrorDetails> userExceptionHandler(UserException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
-    }
-
-    @ExceptionHandler(UserNotAuthorizedException.class)
-    public ResponseEntity<ErrorDetails> unauthorizedUserExceptionHandler(UserNotAuthorizedException exception){
-
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
     @ExceptionHandler(TokenException.class)
-    public ResponseEntity<ErrorDetails> tokenNotFoundExceptionHandler(TokenException exception){
+    public ResponseEntity<ErrorDetails> tokenExceptionHandler(TokenException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
     @ExceptionHandler(InvalidRequestDataException.class)
-    public ResponseEntity<ErrorDetails> InvalidRequestDataExceptionHandler(InvalidRequestDataException exception){
+    public ResponseEntity<ErrorDetails> InvalidRequestHandler(InvalidRequestDataException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getErrorResults().toString(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorDetails> userExceptionHandler(BadCredentialsException exception){
+    public ResponseEntity<ErrorDetails> badCredentialsExceptionHandler(BadCredentialsException exception){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
-    @ExceptionHandler(MessageNotFoundException.class)
-    public ResponseEntity<ErrorDetails> userExceptionHandler(MessageNotFoundException exception ){
+    @ExceptionHandler(MessageException.class)
+    public ResponseEntity<ErrorDetails> messageExceptionHandler(MessageException exception ){
 
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
+    }
+
+    @ExceptionHandler(OTPException.class)
+    public ResponseEntity<ErrorDetails> OTPExceptionHandler(OTPException exception ){
+
+        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> globalExceptionHandler(Exception exception){
         exception.printStackTrace();
-        ErrorDetails errorDetails = new ErrorDetails(exception.toString(), exception.getMessage(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus. INTERNAL_SERVER_ERROR).body(errorDetails);
+        ErrorDetails errorDetails = new ErrorDetails(
+                ErrorConstant.GENERIC_ERROR.getErrorCode(),
+                ErrorConstant.GENERIC_ERROR.getErrorMessage()+" "+exception.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorDetails);
     }
 
 

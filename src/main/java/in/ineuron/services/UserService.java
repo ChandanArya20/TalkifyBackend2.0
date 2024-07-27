@@ -1,9 +1,6 @@
 package in.ineuron.services;
 
-import in.ineuron.dto.UserResponse;
-import in.ineuron.dto.UserUpdateRequest;
-import in.ineuron.exception.BadCredentialsException;
-import in.ineuron.exception.UserNotFoundException;
+import in.ineuron.dto.*;
 import in.ineuron.models.User;
 import jakarta.servlet.http.Cookie;
 
@@ -18,7 +15,15 @@ public interface UserService {
 
     public Cookie getNewCookie(Long userId, String cookieName, int lifeTime);
 
-    public User registerUser(User user);
+    public User registerUser(RegisterRequest requestData);
+
+    public User loginUser(LoginRequest loginData);
+
+    public Integer generateOTP(String email);
+
+    public boolean verifyOTP(VerifyOTPRequest request);
+
+    public User updatePassword(UpdateUserPasswordReq request);
 
     public User fetchUserByPhone(String phone);
 

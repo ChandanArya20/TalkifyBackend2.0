@@ -1,8 +1,5 @@
 package in.ineuron.dto;
 
-import in.ineuron.models.MessageType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package in.ineuron.restcontrollers;
+package in.ineuron.controllers;
 
 import in.ineuron.models.MediaFile;
 import in.ineuron.repositories.MediaFileRepository;
