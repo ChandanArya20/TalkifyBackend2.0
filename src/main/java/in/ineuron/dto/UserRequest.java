@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RegisterRequest {
+public class UserRequest {
 
 	@NotBlank(message = "Name should not be empty or null")
 	@Size(min=3, message = "Name should be greater than 2")

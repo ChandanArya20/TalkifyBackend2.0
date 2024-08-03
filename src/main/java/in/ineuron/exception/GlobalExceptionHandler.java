@@ -35,13 +35,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(exception.getStatus()).body(errorDetails);
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorDetails> badCredentialsExceptionHandler(BadCredentialsException exception){
-
-        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage());
-        return ResponseEntity.status(exception.getStatus()).body(errorDetails);
-    }
-
     @ExceptionHandler(MessageException.class)
     public ResponseEntity<ErrorDetails> messageExceptionHandler(MessageException exception ){
 

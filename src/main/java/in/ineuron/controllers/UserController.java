@@ -45,46 +45,27 @@ public class UserController {
     private UserUtils userUtils;
 
     // Endpoint for registering a new user
-    @PostMapping("/register")
+    @PostMapping("/signup")
     @ValidateRequestData
-    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest requestData, BindingResult result, HttpServletResponse response) {
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest requestData, BindingResult result) {
 
-        User registeredUser = userService.registerUser(requestData);
-        //setting cookie for validation
-        response.addCookie(userService.getNewCookie(registeredUser.getId(),AUTH_TOKEN, 7*24*60)); // 7 days lifetime for cookie
-
-        return ResponseEntity.ok(userUtils.getUserResponse(registeredUser));
+        UserResponse registeredUser = userService.saveUser(requestData);
+        return ResponseEntity.ok(registeredUser);
     }
 
     @ValidateRequestData
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> loginUser(@Valid @RequestBody LoginRequest loginData, BindingResult result, HttpServletResponse response) {
+    public ResponseEntity<UserLoginResponse> loginUser(@Valid @RequestBody LoginRequest loginData, BindingResult result, HttpServletResponse response) {
 
-        User user = userService.loginUser(loginData);
-
-        // Create a response object and set an authentication token cookie
-        response.addCookie(userService.getNewCookie(user.getId(), AUTH_TOKEN, 7*24*60)); // 7 days lifetime for cookie
-        return ResponseEntity.ok(userUtils.getUserResponse(user));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<String> logoutUser(@CookieValue(AUTH_TOKEN) String authToken, HttpServletResponse response) {
-        tokenService.removeToken(authToken);
-        Cookie cookie = new Cookie(AUTH_TOKEN, null);
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok("User logged out successfully at "+ LocalDateTime.now());
+        UserLoginResponse user = userService.loginUser(loginData);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/profile")
-    @ValidateUser
-    public ResponseEntity<UserResponse> getLoginUserDetails(@CookieValue(AUTH_TOKEN) String authToken) {
+    public ResponseEntity<UserResponse> getLoginUserDetails() {
 
-        Long id = tokenService.getUserIdFromToken(authToken);
-        UserResponse userResponse = userUtils.getUserResponse(userService.findUserById(id));
+        String email = userService.getUsername();
+        UserResponse userResponse = userUtils.getUserResponse(userService.fetchUserByEmail(email));
 
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }

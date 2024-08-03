@@ -19,7 +19,10 @@ public enum ErrorConstant {
 	USER_CONFLICT_ERROR(1011, "Conflict"),
 	INVALID_PASSWORD_ERROR(1012, "Invalid password"),
 	EMAIL_SENDING_ERROR(1013, "Error while sending email"),
-	OTP_ERROR(1013, "OTP error");
+	OTP_ERROR(1013, "OTP error"),
+	TOKEN_INVALID_ERROR(1014, "Token is invalid"),
+	NOT_ALLOWED_RESOURCE_ERROR(1015, "Forbidden"),
+	USER_UNAUTHORIZED_ERROR(1016, "Unauthorized");
 
 	private final int errorCode;
     private final String errorMessage;

@@ -2,8 +2,8 @@ package in.ineuron.utils;
 
 import in.ineuron.constant.ErrorConstant;
 import in.ineuron.dto.UserResponse;
-import in.ineuron.exception.BadCredentialsException;
 import in.ineuron.exception.TokenException;
+import in.ineuron.models.Role;
 import in.ineuron.models.User;
 import in.ineuron.services.TokenStorageService;
 import jakarta.servlet.http.Cookie;
@@ -82,10 +82,10 @@ public class UserUtils {
 
     // Method to convert User entity to UserResponse DTO
     public UserResponse getUserResponse(User user){
-
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user,userResponse);
-
+        List<String> roleList = user.getRoles().stream().map(Role::getName).toList();
+        userResponse.setRoles(roleList);
         return userResponse;
     }
 

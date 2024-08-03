@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Objects;
+import java.util.Set;
 
 
 @Data
@@ -34,6 +35,11 @@ public class User {
 
 	@Column(nullable = false)
 	private String password;
+
+	boolean active;
+
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Set<Role> roles;
 
 	@Override
 	public boolean equals(Object o) {
