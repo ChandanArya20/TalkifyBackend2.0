@@ -30,14 +30,11 @@ public class ChatServiceImpl implements ChatService {
 
     private final ChatRepository chatRepo;
     private final UserService userService;
-    private final UserUtils userUtils;
-    private final ChatUtils chatUtils;
-    private final TalkifyUtils talkifyUtils;
 
     @Override
-    public Chat createSingleChat(Long reqUserId, Long participantId) {
+    public Chat createSingleChat(Long participantId) {
 
-        User reqUser = userService.findUserById(reqUserId);
+        User reqUser = userService.getLoggedInUser();
         User participantUser = userService.findUserById(participantId);
 
         Optional<Chat> chatOptional = chatRepo.findSingleChatByUserIds(reqUser, participantUser);
@@ -74,16 +71,14 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<Chat> findAllChatsByUserId(Long userId) {
-
-        User user = userService.findUserById(userId);
+    public List<Chat> findAllChats() {
+        User user = userService.getLoggedInUser();
         List<Chat> chats = chatRepo.findNonDeletedChatsByUser(user);
         Collections.reverse(chats);
 
         // filter deleted messages data from every chat
         return chats.stream()
                 .map(chat -> {
-
                     List<Message> messages = chat.getMessages()
                             .stream()
                             .filter(message -> !message.getDeletedByUsers().contains(user))
@@ -95,9 +90,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat createGroup(GroupChatRequest req, Long reqUserId) {
+    public Chat createGroup(GroupChatRequest req) {
         Chat group = new Chat();
-        User createdBy = userService.findUserById(reqUserId);
+        User createdBy = userService.getLoggedInUser();
 
         group.setIsGroup(true);
         group.setChatName(req.getGroupName());
@@ -115,10 +110,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat addUserToGroup(Long chatId, Long userId, Long reqUserId) {
-
+    public Chat addUserToGroup(Long chatId, Long userId) {
         Chat chat = findChatById(chatId);
-        User reqUser = userService.findUserById(reqUserId);
+        User reqUser = userService.getLoggedInUser();
         User user = userService.findUserById(userId);
 
         if (chat.getAdmins().contains(reqUser)) {
@@ -134,9 +128,9 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat renameGroup(Long chatId, String newGroupName, Long reqUserId) {
+    public Chat renameGroup(Long chatId, String newGroupName) {
         Chat chat = findChatById(chatId);
-        User reqUser = userService.findUserById(reqUserId);
+        User reqUser = userService.getLoggedInUser();
 
         if (chat.getMembers().contains(reqUser)) {
             chat.setChatName(newGroupName);
@@ -152,11 +146,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat removeUserFromGroup(Long chatId, Long userId, Long reqUserId) {
+    public Chat removeUserFromGroup(Long chatId, Long userId) {
 
         Chat chat = findChatById(chatId);
         // Find the user who requested the removal
-        User reqUser = userService.findUserById(reqUserId);
+        User reqUser = userService.getLoggedInUser();
         // Find the user to be removed from the group
         User user = userService.findUserById(userId);
 
@@ -165,7 +159,7 @@ public class ChatServiceImpl implements ChatService {
             chat.getAdmins().remove(user);
         } else if (chat.getMembers().contains(reqUser)) {
             // If the requester is not an admin but a member of the group
-            if (userId.equals(reqUserId)) {
+            if (userId.equals(reqUser.getId())) {
                 chat.getMembers().remove(user);
             } else {
                 throw new UserException(
@@ -186,11 +180,11 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat deleteChat(Long chatId, Long userId) {
+    public Chat deleteChat(Long chatId) {
 
         Chat chat = findChatById(chatId);
         // Find the user who requested the deletion
-        User user = userService.findUserById(userId);
+        User user = userService.getLoggedInUser();
 
         // Check if the chat is a group chat and if the user is an admin
         if (chat.getIsGroup() && !chat.getAdmins().contains(user)) {
@@ -221,6 +215,5 @@ public class ChatServiceImpl implements ChatService {
         // Save the changes to the chat in the repository and return the updated chat
         return chatRepo.save(chat);
     }
-
 
 }

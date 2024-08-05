@@ -35,17 +35,13 @@ public class MessageServiceImpl implements MessageService {
     private MessageRepository msgRepo;
     private UserService userService;
     private ChatService chatService;
-    private UserUtils userUtils;
-    private MessageUtils messageUtils;
     private ChatRepository chatRepo;
     private TalkifyUtils talkifyUtils;
 
     @Override
-    public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
-
+    public Message sendTextMessage(MessageRequest messReq) throws IOException {
         // Find the user who sent the message
-        User reqUser = userService.findUserById(reqUserId);
-
+        User reqUser = userService.getLoggedInUser();
         // Find the chat where the message is being sent
         Chat chat = chatService.findChatById(messReq.getChatId());
         Message message = null;
@@ -56,26 +52,19 @@ public class MessageServiceImpl implements MessageService {
         txtMsg.setMessage(messReq.getTextMessage());
         txtMsg.setCreatedBy(reqUser);
         txtMsg.setChat(chat);
-
         message = txtMsg;
 
-        // Save the Message entity first
         Message savedMessage = msgRepo.save(message);
-
-        // Add the saved Message to the Chat's list of messages
         chat.getMessages().add(savedMessage);
-
-        // Save the Chat entity
         Chat savedChat = chatRepo.save(chat);
 
         return savedMessage;
     }
 
     @Override
-    public Message sendMediaMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+    public Message sendMediaMessage(MessageRequest messReq) throws IOException {
         // Find the user who sent the message
-        User reqUser = userService.findUserById(reqUserId);
-
+        User reqUser = userService.getLoggedInUser();
         // Find the chat where the message is being sent
         Chat chat = chatService.findChatById(messReq.getChatId());
         Message message = null;
@@ -97,8 +86,6 @@ public class MessageServiceImpl implements MessageService {
         // Set media data and category for the media message
         mediaMsg.setMediaData(mediaFile);
         mediaMsg.setMediaCategory(talkifyUtils.getMediaCategory(messReq.getMediaFile()));
-
-        // Set note message if provided
         if (messReq.getNoteMessage() != null) {
             mediaMsg.setNoteMessage(messReq.getNoteMessage());
         }
@@ -109,22 +96,18 @@ public class MessageServiceImpl implements MessageService {
 
         // Save the Message entity first
         Message savedMessage = msgRepo.save(message);
-
-        // Add the saved Message to the Chat's list of messages
         chat.getMessages().add(savedMessage);
-
-        // Save the Chat entity
         Chat savedChat = chatRepo.save(chat);
 
         return savedMessage;
     }
 
     @Override
-    public List<Message> getChatMessages(Long chatId, Long reqUserId) {
+    public List<Message> getChatMessages(Long chatId) {
 
         Chat chat = chatService.findChatById(chatId);
         // Find the user who requested the chat messages
-        User user = userService.findUserById(reqUserId);
+        User user = userService.getLoggedInUser();
 
         // Check if the user is a member of the chat
         if (!chat.getMembers().contains(user)) {
@@ -155,11 +138,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message deleteMessage(Long messageId, Long reqUserId) {
+    public Message deleteMessage(Long messageId) {
 
         Message msg = findMessageById(messageId);
         // Find the user who requested the deletion
-        User user = userService.findUserById(reqUserId);
+        User user = userService.getLoggedInUser();
 
         // Check if the user is the creator of the message
         if (msg.getCreatedBy().getId().equals(messageId)) {
@@ -176,10 +159,10 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Chat deleteAllMessagesByChatId(Long chatId, Long reqUserId) {
+    public Chat deleteAllMessagesByChatId(Long chatId) {
 
         Chat chat = chatService.findChatById(chatId);
-        User user = userService.findUserById(reqUserId);
+        User user = userService.fetchUserByEmail(userService.getUsername());
 
         if (!chat.getMembers().contains(user)) {
             throw new UserException(
@@ -210,9 +193,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds, Long reqUserId) {
+    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds) {
         Chat chat = chatService.findChatById(chatId);
-        User user = userService.findUserById(reqUserId);
+        User user = userService.getLoggedInUser();
 
         if (!chat.getMembers().contains(user)) {
             throw new UserException(

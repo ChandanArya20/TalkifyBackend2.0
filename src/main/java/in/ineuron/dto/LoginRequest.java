@@ -1,5 +1,6 @@
 package in.ineuron.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.*;
 
 @Getter
 @ToString
+@AllArgsConstructor
 public class LoginRequest {
 
 	@NotBlank(message = "Email is required, please enter email")

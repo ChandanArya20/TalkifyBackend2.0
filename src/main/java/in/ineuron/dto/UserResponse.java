@@ -22,8 +22,8 @@ public class UserResponse {
 
 	private String about;
 
-	boolean active;
+//	boolean active;
 
-	private List<String> roles;
+//	private List<String> roles;
 	
 }

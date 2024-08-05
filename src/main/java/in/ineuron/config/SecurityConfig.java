@@ -32,8 +32,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(requests -> requests
-                    .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
-                    .requestMatchers("api/admins/**").hasRole("ADMIN")
+                    .requestMatchers("/api/users/signup",
+                            "/api/users/login",
+                            "/api/users/login",
+                            "/api/users/otp/send/**",
+                            "/api/users/otp/verify",
+                            "/api/media/**",
+                            "/api/users/userid/available",
+                            "/websocket/**").permitAll()
+
+                    .requestMatchers("/api/admins/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

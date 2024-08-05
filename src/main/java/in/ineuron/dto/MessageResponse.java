@@ -2,6 +2,8 @@ package in.ineuron.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class MessageResponse {
 
@@ -19,7 +21,7 @@ public class MessageResponse {
 
     private Long fileSize;
 
-    private String creationTime;
+    private LocalDateTime creationTime;
 
     private UserResponse createdBy;
 

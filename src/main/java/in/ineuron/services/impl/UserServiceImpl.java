@@ -12,64 +12,49 @@ import in.ineuron.repositories.UserRepository;
 import in.ineuron.security.UserDetailsServiceImpl;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
-import in.ineuron.services.TokenStorageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.JwtUtil;
-import in.ineuron.utils.UserUtils;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.util.*;
 
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
-    private TokenStorageService tokenService;
-    private AuthenticationManager authenticationManager;
-    private UserDetailsServiceImpl userDetailsService;
-    private PasswordEncoder passwordEncoder;
-    private OTPSenderService otpSender;
-    private OTPStorageService otpStorage;
-    private JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final OTPSenderService otpSender;
+    private final OTPStorageService otpStorage;
+    private final JwtUtil jwtUtil;
+
+    @Value("${jwt.token.expiration}")
+    private long tokenExpirationTime;
+
 
     @Override
     public Boolean isUserAvailableByPhone(String phone) {
-
         return userRepo.existsByPhone(phone);
     }
 
     @Override
     public Boolean isUserAvailableByEmail(String email) {
-
         return userRepo.existsByEmail(email);
-    }
-
-    @Override
-    public Cookie getNewCookie(Long userId, String cookieName, int lifeTime) {
-
-        String token = tokenService.generateToken(userId);
-        Cookie cookie = new Cookie(cookieName, token);   //setting cookie
-        int maxAge = lifeTime * 60;  // minutes in seconds
-        cookie.setMaxAge(maxAge);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        return cookie;
     }
 
     @Override
@@ -145,7 +130,7 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(user.getEmail(), request.getPassword()));
 
             if (authenticate.isAuthenticated()) {
-                jwtToken = jwtUtil.generateToken(request.getEmail());
+                jwtToken = jwtUtil.generateToken(request.getEmail(), tokenExpirationTime);
             }
 
             return new UserLoginResponse(jwtToken, mapToUserResponse(user));
@@ -166,7 +151,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Integer generateOTP(String email) {
+    public Integer generateAndSendOTP(String email) {
 
         if (isUserAvailableByEmail(email)) {
             Integer OTP;
@@ -205,7 +190,6 @@ public class UserServiceImpl implements UserService {
         if (otpStorage.verifyOTP(request.getEmail(), request.getOTP())) {
             otpStorage.removeOTP(request.getEmail());
             return true;
-
         } else {
             return false;
         }
@@ -213,18 +197,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updatePassword(UpdateUserPasswordReq request) {
-        User user = fetchUserByEmail(request.getEmail());
-        user = updateUserPassword(user.getId(), passwordEncoder.encode(request.getNewPassword()));
-
-        return user;
-    }
-
-
-    @Override
-    public User updateUserPassword(Long userId, String newPassword) {
-        User user = findUserById(userId);
-        user.setPassword(newPassword);
-        return userRepo.save(user);
+        String newPassword = request.getNewPassword();
+        User user = fetchUserByEmail(getUsername());
+        String password = user.getPassword();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPhone("9876543213");
+        user.setUserid("ck_arya40");
+        User save = userRepo.save(user);
+        return save;
     }
 
     @Override
@@ -239,22 +219,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User fetchUserByAuthToken(String token) {
-        Long userId = tokenService.getUserIdFromToken(token);
-
-        if (userId == null) {
-            throw new TokenException(
-                    ErrorConstant.TOKEN_EXPIRED_ERROR.getErrorCode(),
-                    ErrorConstant.TOKEN_EXPIRED_ERROR.getErrorMessage(),
-                    HttpStatus.UNAUTHORIZED
-            );
-        }
-        return findUserById(userId);
-    }
-
-    @Override
-    public List<User> searchUser(String query) {
-        return userRepo.searchUser(query);
+    public List<UserResponse> searchUser(String query) {
+        String email = getUsername();
+        List<User> users = userRepo.searchUser(query);
+        //Removes the logged user from list
+        users=users.stream().filter(user-> !user.getEmail().equals(email)).toList();
+        return mapToUserResponse(users);
     }
 
     @Override
@@ -287,8 +257,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(UserUpdateRequest userToUpdate) {
-        User user = findUserById(userToUpdate.getId());
+    public UserResponse updateUser(UserUpdateRequest userToUpdate) {
+        User user = fetchUserByEmail(getUsername());
 
         if (userToUpdate.getName() != null)
             user.setName(userToUpdate.getName());
@@ -308,16 +278,15 @@ public class UserServiceImpl implements UserService {
         if (userToUpdate.getAbout() != null)
             user.setAbout(userToUpdate.getAbout());
 
-        System.out.println(user);
-        return userRepo.save(user);
+        return mapToUserResponse(userRepo.save(user));
     }
 
     // Method to convert User entity to UserResponse DTO
     private UserResponse mapToUserResponse(User user){
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user,userResponse);
-        List<String> roleList = user.getRoles().stream().map(Role::getName).toList();
-        userResponse.setRoles(roleList);
+//        List<String> roleList = user.getRoles().stream().map(Role::getName).toList();
+//        userResponse.setRoles(roleList);
         return userResponse;
     }
 
@@ -330,5 +299,10 @@ public class UserServiceImpl implements UserService {
             userResponses.add(userResponse);
         }
         return userResponses;
+    }
+
+    @Override
+    public User getLoggedInUser(){
+        return fetchUserByEmail(getUsername());
     }
 }

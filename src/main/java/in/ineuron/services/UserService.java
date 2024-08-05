@@ -15,15 +15,13 @@ public interface UserService {
 
     public Boolean isUserAvailableByEmail(String email);
 
-    public Cookie getNewCookie(Long userId, String cookieName, int lifeTime);
-
     public UserResponse saveUser(UserRequest requestData);
 
     public UserLoginResponse loginUser(LoginRequest loginData);
 
     String getUsername();
 
-    public Integer generateOTP(String email);
+    public Integer generateAndSendOTP(String email);
 
     public boolean verifyOTP(VerifyOTPRequest request);
 
@@ -33,19 +31,17 @@ public interface UserService {
 
     public User fetchUserByEmail(String email);
 
-    public User updateUserPassword(Long userId, String newPassword);
-
     public User findUserById(Long userId);
 
-    public User fetchUserByAuthToken(String token);
+    public List<UserResponse> searchUser(String query);
 
-    public List<User> searchUser(String query);
-
-    public User updateUser(UserUpdateRequest userToUpdate);
+    public UserResponse updateUser(UserUpdateRequest userToUpdate);
 
     public Optional<User> fetchUserByUserid(String query);
 
     List<UserResponse> fetchAllUsers();
 
     UserResponse makeUserAdmin(LoginRequest userReq);
+
+    User getLoggedInUser();
 }

@@ -15,10 +15,10 @@ public class WebSocketMessagingService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void sendMessageToUser(Long chatId, MessageResponse messageResponse) {
-        messagingTemplate.convertAndSend(Constant.MESSAGE_QUEUE_PREFIX + chatId, messageResponse);
+        messagingTemplate.convertAndSend(Constant.MESSAGE_TOPIC_PREFIX + chatId, messageResponse);
     }
 
     public void sendChatMessages(Long chatId, List<MessageResponse> messageResponses) {
-        messagingTemplate.convertAndSend(Constant.MESSAGES_QUEUE_PREFIX + chatId, messageResponses);
+        messagingTemplate.convertAndSend(Constant.MESSAGES_TOPIC_PREFIX + chatId, messageResponses);
     }
 }

@@ -13,18 +13,18 @@ public interface MessageService {
 
 //    public Message sendMessage(MessageRequest messReq, Long reqUserId) throws IOException;
 
-    Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+    Message sendTextMessage(MessageRequest messReq) throws IOException;
 
-    Message sendMediaMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+    Message sendMediaMessage(MessageRequest messReq) throws IOException;
 
-    public List<Message> getChatMessages(Long chatId, Long reqUserId);
+    public List<Message> getChatMessages(Long chatId);
 
     public Message findMessageById(Long messageId);
 
-    public Message deleteMessage(Long messageId, Long reqUserId);
+    public Message deleteMessage(Long messageId);
 
-    public Chat deleteAllMessagesByChatId(Long chatId, Long reqUserId);
+    public Chat deleteAllMessagesByChatId(Long chatId);
 
-    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds, Long reqUserId);
+    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds);
 
 }

@@ -15,8 +15,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,17 +33,12 @@ public class MessageUtils {
         // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
 
-        // Format creation time
-        LocalTime localTime = message.getCreationTime().toLocalTime();
-        String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
-
         // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message, messageResponse);
 
         // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
-        messageResponse.setCreationTime(formatTime);
         messageResponse.setChatId(chatId);
 
         // Set message specific properties based on message type
@@ -73,17 +66,12 @@ public class MessageUtils {
         // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
 
-        // Format creation time
-        LocalTime localTime = message.getCreationTime().toLocalTime();
-        String formatTime = localTime.format(DateTimeFormatter.ofPattern("hh:mm a"));
-
         // Create MessageResponse object and copy properties from Message entity
         MessageResponse messageResponse = new MessageResponse();
         BeanUtils.copyProperties(message, messageResponse);
 
         // Set createdBy, creation time, and chatId in MessageResponse
         messageResponse.setCreatedBy(createdBy);
-        messageResponse.setCreationTime(formatTime);
         messageResponse.setChatId(message.getChat().getId());
 
         // Set message specific properties based on message type
@@ -139,5 +127,6 @@ public class MessageUtils {
                         HttpStatus.NOT_FOUND
                 ));
     }
+
 
 }

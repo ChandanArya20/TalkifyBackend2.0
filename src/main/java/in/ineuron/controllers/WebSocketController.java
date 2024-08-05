@@ -10,12 +10,14 @@ import in.ineuron.utils.MessageUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
 
-@Controller
+@RestController
 @AllArgsConstructor
 public class WebSocketController {
 
@@ -24,9 +26,9 @@ public class WebSocketController {
     private final WebSocketMessagingService webSocketMessagingService;
 
     // WebSocket handler to accept text message
-    @MessageMapping("/messages/send")
+    @MessageMapping("/message/send")
     public void sendMessageWebSocket(@Payload MessageRequest msgRequest) throws IOException {
-        Message message = messageService.sendTextMessage(msgRequest, msgRequest.getReqUserId());
+        Message message = messageService.sendTextMessage(msgRequest);
         MessageResponse messageResponse = messageUtils.getMessageResponse(message);
         webSocketMessagingService.sendMessageToUser(messageResponse.getChatId(), messageResponse);
     }
@@ -34,7 +36,7 @@ public class WebSocketController {
     // WebSocket handler that returns all messages of a chat by chat id
     @MessageMapping("/messages/chats")
     public void getChatMessages(@Payload ChatMessageRequest req) {
-        List<Message> messages = messageService.getChatMessages(req.getChatId(), req.getReqUserId());
+        List<Message> messages = messageService.getChatMessages(req.getChatId());
         List<MessageResponse> messageResponses = messageUtils.getMessageResponse(messages);
         webSocketMessagingService.sendChatMessages(req.getChatId(), messageResponses);
     }
