@@ -15,6 +15,8 @@ public interface MessageService {
 
     Message sendTextMessage(MessageRequest messReq) throws IOException;
 
+    Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException;
+
     Message sendMediaMessage(MessageRequest messReq) throws IOException;
 
     public List<Message> getChatMessages(Long chatId);

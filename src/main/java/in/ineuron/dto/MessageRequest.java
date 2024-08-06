@@ -12,6 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 @ToString
 public class MessageRequest {
 
+    @NotNull(message = "User ID must not be null")
+    private Long reqUserId;
+
     @NotNull(message = "Chat ID must not be null")
     private Long chatId;
 
@@ -20,5 +23,6 @@ public class MessageRequest {
     private  MultipartFile mediaFile;
 
     private String noteMessage;
+
 }
 

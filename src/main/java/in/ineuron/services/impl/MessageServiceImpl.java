@@ -62,6 +62,30 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+        // Find the user who sent the message
+        User reqUser = userService.findUserById(reqUserId);
+        // Find the chat where the message is being sent
+        Chat chat = chatService.findChatById(messReq.getChatId());
+        Message message = null;
+
+        // Create a text message entity
+        TextMessage txtMsg = new TextMessage();
+        txtMsg.setMessageType(MessageType.TEXT);
+        txtMsg.setMessage(messReq.getTextMessage());
+        txtMsg.setCreatedBy(reqUser);
+        txtMsg.setChat(chat);
+        message = txtMsg;
+
+        Message savedMessage = msgRepo.save(message);
+        chat.getMessages().add(savedMessage);
+        Chat savedChat = chatRepo.save(chat);
+
+        return savedMessage;
+    }
+
+
+    @Override
     public Message sendMediaMessage(MessageRequest messReq) throws IOException {
         // Find the user who sent the message
         User reqUser = userService.getLoggedInUser();

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 
-@RestController
+@Controller
 @AllArgsConstructor
 public class WebSocketController {
 
@@ -28,7 +28,7 @@ public class WebSocketController {
     // WebSocket handler to accept text message
     @MessageMapping("/message/send")
     public void sendMessageWebSocket(@Payload MessageRequest msgRequest) throws IOException {
-        Message message = messageService.sendTextMessage(msgRequest);
+        Message message = messageService.sendTextMessage(msgRequest, msgRequest.getReqUserId());
         MessageResponse messageResponse = messageUtils.getMessageResponse(message);
         webSocketMessagingService.sendMessageToUser(messageResponse.getChatId(), messageResponse);
     }
