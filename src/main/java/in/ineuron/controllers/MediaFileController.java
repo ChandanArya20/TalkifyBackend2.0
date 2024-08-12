@@ -1,8 +1,11 @@
 package in.ineuron.controllers;
 
+import in.ineuron.constant.ErrorConstant;
+import in.ineuron.exception.MediaException;
 import in.ineuron.models.MediaFile;
 import in.ineuron.repositories.MediaFileRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +25,8 @@ public class MediaFileController {
     private MediaFileRepository mediaFileRepo;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMediaById(@PathVariable Long id) {
+    @Cacheable(value = "mediaCache", key = "#id")
+    public ResponseEntity<byte[]> getMediaById(@PathVariable Long id) {
 
         // Attempt to find the media file by ID
         Optional<MediaFile> mediaFileOptional = mediaFileRepo.findById(id);
@@ -35,12 +39,17 @@ public class MediaFileController {
                     .contentType(MediaType.valueOf(mediaFile.getFileType()))
                     .body(mediaFile.getMediaContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Media not found for this ID");
+            throw new MediaException(
+                    ErrorConstant.MEDIA_NOT_FOUND_ERROR.getErrorCode(),
+                    ErrorConstant.MEDIA_NOT_FOUND_ERROR.getErrorMessage(),
+                    HttpStatus.NOT_FOUND
+            );
         }
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<?> downloadMediaById(@PathVariable Long id) {
+    @Cacheable(value = "mediaDownloadCache", key = "#id")
+    public ResponseEntity<byte[]> downloadMediaById(@PathVariable Long id) {
 
         // Attempt to find the media file by ID
         Optional<MediaFile> mediaFileOptional = mediaFileRepo.findById(id);
@@ -55,7 +64,11 @@ public class MediaFileController {
                     .contentType(MediaType.valueOf(mediaFile.getFileType()))
                     .body(mediaFile.getMediaContent());
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Media not found for this ID");
+            throw new MediaException(
+                    ErrorConstant.MEDIA_NOT_FOUND_ERROR.getErrorCode(),
+                    ErrorConstant.MEDIA_NOT_FOUND_ERROR.getErrorMessage(),
+                    HttpStatus.NOT_FOUND
+            );
         }
     }
 }

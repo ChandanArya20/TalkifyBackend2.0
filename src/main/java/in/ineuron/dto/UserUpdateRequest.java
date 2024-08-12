@@ -12,7 +12,7 @@ public class UserUpdateRequest {
 
     private String userid;
 
-    private String email;
+//    private String email;
 
     private String phone;
 

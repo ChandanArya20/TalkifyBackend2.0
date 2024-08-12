@@ -22,7 +22,8 @@ public enum ErrorConstant {
 	OTP_ERROR(1013, "OTP error"),
 	TOKEN_INVALID_ERROR(1014, "Token is invalid"),
 	NOT_ALLOWED_RESOURCE_ERROR(1015, "Forbidden"),
-	USER_UNAUTHORIZED_ERROR(1016, "Unauthorized");
+	USER_UNAUTHORIZED_ERROR(1016, "Unauthorized"),
+	MEDIA_NOT_FOUND_ERROR(1017, "Media not found"),;
 
 	private final int errorCode;
     private final String errorMessage;

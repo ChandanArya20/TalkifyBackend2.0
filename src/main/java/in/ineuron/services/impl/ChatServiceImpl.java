@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
@@ -32,6 +31,7 @@ public class ChatServiceImpl implements ChatService {
     private final UserService userService;
 
     @Override
+    @Transactional
     public Chat createSingleChat(Long participantId) {
 
         User reqUser = userService.getLoggedInUser();

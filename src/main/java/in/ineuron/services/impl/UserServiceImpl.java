@@ -4,18 +4,15 @@ import in.ineuron.constant.AuthRoles;
 import in.ineuron.constant.ErrorConstant;
 import in.ineuron.dto.*;
 import in.ineuron.exception.EmailException;
-import in.ineuron.exception.TokenException;
 import in.ineuron.exception.UserException;
 import in.ineuron.models.Role;
 import in.ineuron.models.User;
 import in.ineuron.repositories.UserRepository;
-import in.ineuron.security.UserDetailsServiceImpl;
 import in.ineuron.services.OTPSenderService;
 import in.ineuron.services.OTPStorageService;
 import in.ineuron.services.UserService;
 import in.ineuron.utils.JwtUtil;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,12 +24,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -197,14 +192,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updatePassword(UpdateUserPasswordReq request) {
-        String newPassword = request.getNewPassword();
         User user = fetchUserByEmail(getUsername());
-        String password = user.getPassword();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        user.setPhone("9876543213");
-        user.setUserid("ck_arya40");
-        User save = userRepo.save(user);
-        return save;
+
+        return userRepo.save(user);
     }
 
     @Override
@@ -223,7 +214,7 @@ public class UserServiceImpl implements UserService {
         String email = getUsername();
         List<User> users = userRepo.searchUser(query);
         //Removes the logged user from list
-        users=users.stream().filter(user-> !user.getEmail().equals(email)).toList();
+        users = users.stream().filter(user -> !user.getEmail().equals(email)).toList();
         return mapToUserResponse(users);
     }
 
@@ -241,10 +232,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse makeUserAdmin(LoginRequest userReq) {
         User user = fetchUserByEmail(userReq.getEmail());
-        if (user.getPassword().equals(userReq.getPassword())){
+        if (user.getPassword().equals(userReq.getPassword())) {
             throw new UserException(
                     ErrorConstant.INVALID_PASSWORD_ERROR.getErrorCode(),
-                    ErrorConstant.INVALID_PASSWORD_ERROR.getErrorMessage()+" : user password is not current",
+                    ErrorConstant.INVALID_PASSWORD_ERROR.getErrorMessage() + " : user password is not current",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -269,9 +260,6 @@ public class UserServiceImpl implements UserService {
         if (userToUpdate.getPhone() != null)
             user.setPhone(userToUpdate.getPhone());
 
-        if (userToUpdate.getEmail() != null)
-            user.setEmail(userToUpdate.getEmail());
-
         if (userToUpdate.getProfileImage() != null)
             user.setProfileImage(userToUpdate.getProfileImage());
 
@@ -282,19 +270,19 @@ public class UserServiceImpl implements UserService {
     }
 
     // Method to convert User entity to UserResponse DTO
-    private UserResponse mapToUserResponse(User user){
+    private UserResponse mapToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
-        BeanUtils.copyProperties(user,userResponse);
+        BeanUtils.copyProperties(user, userResponse);
 //        List<String> roleList = user.getRoles().stream().map(Role::getName).toList();
 //        userResponse.setRoles(roleList);
         return userResponse;
     }
 
     // Method to convert collection of User entities to list of UserResponse DTOs
-    private List<UserResponse> mapToUserResponse(Collection<User> users){
+    private List<UserResponse> mapToUserResponse(Collection<User> users) {
         List<UserResponse> userResponses = new ArrayList<>();
 
-        for(User user:users){
+        for (User user : users) {
             UserResponse userResponse = mapToUserResponse(user);
             userResponses.add(userResponse);
         }
@@ -302,7 +290,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getLoggedInUser(){
+    public User getLoggedInUser() {
         return fetchUserByEmail(getUsername());
     }
 }

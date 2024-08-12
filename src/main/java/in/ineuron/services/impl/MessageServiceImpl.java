@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@Transactional
 @AllArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
@@ -39,6 +38,7 @@ public class MessageServiceImpl implements MessageService {
     private TalkifyUtils talkifyUtils;
 
     @Override
+    @Transactional
     public Message sendTextMessage(MessageRequest messReq) throws IOException {
         // Find the user who sent the message
         User reqUser = userService.getLoggedInUser();
@@ -62,6 +62,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @Transactional
     public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
         // Find the user who sent the message
         User reqUser = userService.findUserById(reqUserId);
@@ -86,6 +87,7 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
+    @Transactional
     public Message sendMediaMessage(MessageRequest messReq) throws IOException {
         // Find the user who sent the message
         User reqUser = userService.getLoggedInUser();
