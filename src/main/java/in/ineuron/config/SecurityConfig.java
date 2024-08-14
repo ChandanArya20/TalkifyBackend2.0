@@ -32,8 +32,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(requests -> requests
-                    .requestMatchers("/api/users/signup",
-                            "/api/users/login",
+                    .requestMatchers("/api/test",
+                            "/api/users/signup",
                             "/api/users/login",
                             "/api/users/otp/send/**",
                             "/api/users/otp/verify",
