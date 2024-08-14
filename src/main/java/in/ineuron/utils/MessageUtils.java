@@ -53,7 +53,7 @@ public class MessageUtils {
             messageResponse.setMessageType(mediaMessageData.getFileType());
             messageResponse.setFileName(mediaMessageData.getFileName());
             messageResponse.setFileSize(mediaMessageData.getFileSize());
-            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId());
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId()+"/stream");
             messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
         }
 
@@ -85,7 +85,7 @@ public class MessageUtils {
 
             messageResponse.setMessageType(mediaMessageData.getFileType());
             messageResponse.setFileName(mediaMessageData.getFileName());
-            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId());
+            messageResponse.setMediaURL(talkifyUtils.getBaseURL() + "/api/media/" + mediaMessageData.getId()+"/stream");
             messageResponse.setNoteMessage(mediaMessage.getNoteMessage());
         }
 

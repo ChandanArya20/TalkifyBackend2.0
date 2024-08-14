@@ -19,8 +19,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // These are endpoints the client can subscribes to.
-        registry.enableSimpleBroker("/topic","/queue");
+        // These are endpoints the client can subscribe to.
+        registry.enableSimpleBroker("/topic");
         // Message received with one of those below destinationPrefixes will be automatically router to controllers @MessageMapping
         registry.setApplicationDestinationPrefixes("/app");
     }
