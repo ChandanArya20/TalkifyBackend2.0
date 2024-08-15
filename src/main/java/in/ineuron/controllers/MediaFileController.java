@@ -54,7 +54,7 @@ public class MediaFileController {
         }
     }
 
-    @GetMapping("/{id}/download")
+    @GetMapping("/{id}/stream/download")
     @Cacheable(value = "mediaDownloadCache", key = "#id")
     public ResponseEntity<byte[]> downloadMediaById(@PathVariable Long id) {
 
