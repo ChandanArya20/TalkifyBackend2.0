@@ -32,7 +32,7 @@ public class TalkifyUtils {
         };
     }
 
-    public String formatMap(Map<String, String> errorResults) {
+    public String formatFieldError(Map<String, String> errorResults) {
         StringBuilder formattedString = new StringBuilder();
 
         for (var entry : errorResults.entrySet()) {

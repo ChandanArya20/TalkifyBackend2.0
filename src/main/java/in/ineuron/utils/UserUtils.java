@@ -16,27 +16,6 @@ import java.util.*;
 @AllArgsConstructor
 public class UserUtils {
 
-    // Method to validate user credentials and return validation errors
-    public Map<String, String> getValidateUserCredentialError(BindingResult result) {
-
-        Map<String, String> errorsMap = new HashMap<>();
-
-        if (result.hasErrors()) {
-            // Extract error messages and field names
-            for (ObjectError error : result.getAllErrors()) {
-
-                if (error instanceof FieldError) {
-                    FieldError fieldError = (FieldError) error;
-                    errorsMap.put(fieldError.getField(), error.getDefaultMessage());
-                } else {
-                    errorsMap.put("global", error.getDefaultMessage());
-                }
-            }
-        }
-        // Return only error messages and field names
-        return errorsMap;
-    }
-
     // Method to convert User entity to UserResponse DTO
     public UserResponse getUserResponse(User user) {
         UserResponse userResponse = new UserResponse();

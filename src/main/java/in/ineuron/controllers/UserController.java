@@ -1,6 +1,5 @@
 package in.ineuron.controllers;
 
-import in.ineuron.annotation.ValidateRequestData;
 import in.ineuron.constant.ErrorConstant;
 import in.ineuron.dto.*;
 import in.ineuron.exception.OTPException;
@@ -37,17 +36,15 @@ public class UserController {
 
     // Endpoint for registering a new user
     @PostMapping("/signup")
-    @ValidateRequestData
-    public ResponseEntity<UserLoginResponse> registerUser(@Valid @RequestBody UserRequest requestData, BindingResult result) {
+    public ResponseEntity<UserLoginResponse> registerUser(@Valid @RequestBody UserRequest requestData) {
         UserResponse registeredUser = userService.saveUser(requestData);
         UserLoginResponse loginResponse = userService.loginUser(new LoginRequest(requestData.getEmail(), requestData.getPassword()));
 
         return ResponseEntity.ok(loginResponse);
     }
 
-    @ValidateRequestData
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> loginUser(@Valid @RequestBody LoginRequest loginData, BindingResult result, HttpServletResponse response) {
+    public ResponseEntity<UserLoginResponse> loginUser(@Valid @RequestBody LoginRequest loginData, HttpServletResponse response) {
         UserLoginResponse user = userService.loginUser(loginData);
         return ResponseEntity.ok(user);
     }
@@ -90,7 +87,7 @@ public class UserController {
 
     @PutMapping("password/update-with-otp")
     public ResponseEntity<UserLoginResponse> UpdateUserPasswordAfterOTPVerified(@Valid @RequestBody UpdateUserPasswordReq userCredential,
-                                                                                BindingResult result, HttpServletResponse response) {
+                                                                                        HttpServletResponse response) {
         User user = userService.updatePassword(userCredential);
         UserLoginResponse loginResponse = userService.loginUser(new LoginRequest(user.getEmail(), userCredential.getNewPassword()));
 
