@@ -199,7 +199,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserById(Long userId) {
+    public User findUserById(String userId) {
         return userRepo.findById(userId).orElseThrow(
                 () -> new UserException(
                         ErrorConstant.USER_NOT_FOUND_ERROR.getErrorCode(),

@@ -22,5 +22,5 @@ public class GroupChatRequest {
 
     @NotEmpty(message = "User IDs must not be empty")
     @Valid // Ensures validation is cascaded to elements in the list
-    private List<Long> membersId;
+    private List<String> membersId;
 }

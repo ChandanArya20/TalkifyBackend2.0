@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class MessageResponse {
 
-    private Long id;
+    private String id;
 
     private String messageType;
 
@@ -25,6 +25,6 @@ public class MessageResponse {
 
     private UserResponse createdBy;
 
-    private Long chatId;
+    private String chatId;
 
 }

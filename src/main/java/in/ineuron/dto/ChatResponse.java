@@ -13,7 +13,7 @@ import java.util.Set;
 @Data
 public class ChatResponse {
 
-    private Long id;
+    private String id;
 
     private String chatName;
 

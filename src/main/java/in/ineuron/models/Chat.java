@@ -15,8 +15,8 @@ import java.util.Set;
 public class Chat {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
     
     private String chatName;
 

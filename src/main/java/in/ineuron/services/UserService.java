@@ -31,7 +31,7 @@ public interface UserService {
 
     public User fetchUserByEmail(String email);
 
-    public User findUserById(Long userId);
+    public User findUserById(String userId);
 
     public List<UserResponse> searchUser(String query);
 

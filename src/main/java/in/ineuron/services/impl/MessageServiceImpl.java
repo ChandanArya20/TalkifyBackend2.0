@@ -63,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public Message sendTextMessage(MessageRequest messReq, Long reqUserId) throws IOException {
+    public Message sendTextMessage(MessageRequest messReq, String reqUserId) throws IOException {
         // Find the user who sent the message
         User reqUser = userService.findUserById(reqUserId);
         // Find the chat where the message is being sent
@@ -129,7 +129,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Message> getChatMessages(Long chatId) {
+    public List<Message> getChatMessages(String chatId) {
 
         Chat chat = chatService.findChatById(chatId);
         // Find the user who requested the chat messages
@@ -154,7 +154,7 @@ public class MessageServiceImpl implements MessageService {
 
 
     @Override
-    public Message findMessageById(Long messageId) {
+    public Message findMessageById(String messageId) {
         return msgRepo.findById(messageId).orElseThrow(
                 () -> new MessageException(
                         ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorCode(),
@@ -164,7 +164,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message deleteMessage(Long messageId) {
+    public Message deleteMessage(String messageId) {
 
         Message msg = findMessageById(messageId);
         // Find the user who requested the deletion
@@ -185,7 +185,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Chat deleteAllMessagesByChatId(Long chatId) {
+    public Chat deleteAllMessagesByChatId(String chatId) {
 
         Chat chat = chatService.findChatById(chatId);
         User user = userService.fetchUserByEmail(userService.getUsername());
@@ -219,7 +219,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Chat deleteMessagesByIds(Long chatId, Set<Long> messageIds) {
+    public Chat deleteMessagesByIds(String chatId, Set<String> messageIds) {
         Chat chat = chatService.findChatById(chatId);
         User user = userService.getLoggedInUser();
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public Chat createSingleChat(Long participantId) {
+    public Chat createSingleChat(String participantId) {
 
         User reqUser = userService.getLoggedInUser();
         User participantUser = userService.findUserById(participantId);
@@ -60,7 +61,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat findChatById(Long chatId) {
+    public Chat findChatById(String chatId) {
         return chatRepo.findById(chatId).orElseThrow(
                 () -> new ChatException(
                         ErrorConstant.CHAT_NOT_FOUND_ERROR.getErrorCode(),
@@ -76,18 +77,22 @@ public class ChatServiceImpl implements ChatService {
         List<Chat> chats = chatRepo.findNonDeletedChatsByUser(user);
         Collections.reverse(chats);
 
-        // filter deleted messages data from every chat
+        // Filter and sort messages in each chat
         return chats.stream()
                 .map(chat -> {
+                    // Filter out deleted messages for the user
                     List<Message> messages = chat.getMessages()
                             .stream()
                             .filter(message -> !message.getDeletedByUsers().contains(user))
+                            .sorted(Comparator.comparing(Message::getCreationTime)) // Sort by creationTime
                             .collect(Collectors.toList());
+
                     chat.setMessages(messages);
                     return chat;
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     public Chat createGroup(GroupChatRequest req) {
@@ -101,7 +106,7 @@ public class ChatServiceImpl implements ChatService {
         group.setCreatedBy(createdBy);
         group.getMembers().add(createdBy);
 
-        for (Long memberId : req.getMembersId()) {
+        for (String memberId : req.getMembersId()) {
             User member = userService.findUserById(memberId);
             group.getMembers().add(member);
         }
@@ -110,7 +115,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat addUserToGroup(Long chatId, Long userId) {
+    public Chat addUserToGroup(String chatId, String userId) {
         Chat chat = findChatById(chatId);
         User reqUser = userService.getLoggedInUser();
         User user = userService.findUserById(userId);
@@ -128,7 +133,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat renameGroup(Long chatId, String newGroupName) {
+    public Chat renameGroup(String chatId, String newGroupName) {
         Chat chat = findChatById(chatId);
         User reqUser = userService.getLoggedInUser();
 
@@ -146,7 +151,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat removeUserFromGroup(Long chatId, Long userId) {
+    public Chat removeUserFromGroup(String chatId, String userId) {
 
         Chat chat = findChatById(chatId);
         // Find the user who requested the removal
@@ -180,7 +185,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat deleteChat(Long chatId) {
+    public Chat deleteChat(String chatId) {
 
         Chat chat = findChatById(chatId);
         // Find the user who requested the deletion

@@ -14,8 +14,8 @@ public class User {
 	@Id
 //	@GenericGenerator(name = "gen",strategy = "in.ineuron.idgenerator.IdGenerator")
 //	@GeneratedValue(generator = "gen")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private String id;
 	
 	@Column(nullable = false)
 	private String name;

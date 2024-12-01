@@ -33,7 +33,7 @@ public class MediaFileController {
 
     @GetMapping("/{id}/stream")
     @Cacheable(value = "mediaCache", key = "#id")
-    public ResponseEntity<Resource> getMediaById(@PathVariable Long id) {
+    public ResponseEntity<Resource> getMediaById(@PathVariable String id) {
         System.out.println("MediaFileController.getMediaById");
         // Attempt to find the media file by ID
         Optional<MediaFile> mediaFileOptional = mediaFileRepo.findById(id);
@@ -56,7 +56,7 @@ public class MediaFileController {
 
     @GetMapping("/{id}/stream/download")
     @Cacheable(value = "mediaDownloadCache", key = "#id")
-    public ResponseEntity<byte[]> downloadMediaById(@PathVariable Long id) {
+    public ResponseEntity<byte[]> downloadMediaById(@PathVariable String id) {
 
         // Attempt to find the media file by ID
         Optional<MediaFile> mediaFileOptional = mediaFileRepo.findById(id);

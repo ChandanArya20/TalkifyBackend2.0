@@ -28,7 +28,7 @@ public class MessageUtils {
     private final MessageRepository msgRepo;
 
     // Method to generate MessageResponse object from Message entity and chatId
-    public MessageResponse getMessageResponse(Message message, Long chatId) {
+    public MessageResponse getMessageResponse(Message message, String chatId) {
 
         // Get UserResponse for createdBy
         UserResponse createdBy = userUtils.getUserResponse(message.getCreatedBy());
@@ -93,7 +93,7 @@ public class MessageUtils {
     }
 
     // Method to generate list of MessageResponse objects from collection of Message entities with chatId
-    public List<MessageResponse> getMessageResponse(Collection<Message> messages, Long chatId) {
+    public List<MessageResponse> getMessageResponse(Collection<Message> messages, String chatId) {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
 
@@ -119,7 +119,7 @@ public class MessageUtils {
     }
 
     // Method to fetch media message data by message ID
-    public MediaFileProjection getMediaMessageDataById(Long id) {
+    public MediaFileProjection getMediaMessageDataById(String id) {
         return msgRepo.findMediaDataAttributesByMessageId(id).orElseThrow(
                 () -> new MessageException(
                         ErrorConstant.MESSAGE_NOT_FOUND_ERROR.getErrorCode(),

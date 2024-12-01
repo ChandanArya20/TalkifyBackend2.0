@@ -13,10 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class MessageRequest {
 
     @NotNull(message = "User ID must not be null")
-    private Long reqUserId;
+    private String reqUserId;
 
     @NotNull(message = "Chat ID must not be null")
-    private Long chatId;
+    private String chatId;
 
     private String textMessage;
 

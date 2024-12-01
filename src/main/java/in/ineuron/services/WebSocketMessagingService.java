@@ -14,11 +14,11 @@ public class WebSocketMessagingService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void sendMessageToUser(Long chatId, MessageResponse messageResponse) {
+    public void sendMessageToUser(String chatId, MessageResponse messageResponse) {
         messagingTemplate.convertAndSend(Constant.MESSAGE_TOPIC_PREFIX + chatId, messageResponse);
     }
 
-    public void sendChatMessages(Long chatId, List<MessageResponse> messageResponses) {
+    public void sendChatMessages(String chatId, List<MessageResponse> messageResponses) {
         messagingTemplate.convertAndSend(Constant.MESSAGES_TOPIC_PREFIX + chatId, messageResponses);
     }
 }

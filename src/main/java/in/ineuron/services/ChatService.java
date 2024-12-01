@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface ChatService {
 
-    public Chat createSingleChat(Long participantId);
-    public Chat findChatById(Long chatId);
+    public Chat createSingleChat(String participantId);
+    public Chat findChatById(String chatId);
     public List<Chat> findAllChats();
     public Chat createGroup(GroupChatRequest req);
-    public Chat addUserToGroup(Long chatId, Long userId);
-    public Chat renameGroup(Long chatId, String newChatName);
-    public Chat removeUserFromGroup(Long chatId, Long userId);
-    public Chat deleteChat(Long chatId);
+    public Chat addUserToGroup(String chatId, String userId);
+    public Chat renameGroup(String chatId, String newChatName);
+    public Chat removeUserFromGroup(String chatId, String userId);
+    public Chat deleteChat(String chatId);
 
 }

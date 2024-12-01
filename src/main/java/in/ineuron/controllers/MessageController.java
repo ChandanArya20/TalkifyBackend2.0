@@ -54,25 +54,25 @@ public class MessageController {
     }
 
     @GetMapping("/chats/{chat-id}")
-    public ResponseEntity<List<MessageResponse>> getChatMessages(@PathVariable("chat-id") Long chatId) {
+    public ResponseEntity<List<MessageResponse>> getChatMessages(@PathVariable("chat-id") String chatId) {
         List<Message> messages = messageService.getChatMessages(chatId);
         return ResponseEntity.ok(messageUtils.getMessageResponse(messages));
     }
 
     @DeleteMapping("/all/chats/{chat-id}")
-    public ResponseEntity<ChatResponse> deleteAllMessages(@PathVariable("chat-id") Long chatId) {
+    public ResponseEntity<ChatResponse> deleteAllMessages(@PathVariable("chat-id") String chatId) {
         Chat chat = messageService.deleteAllMessagesByChatId(chatId);
         return ResponseEntity.ok(chatUtils.getChatResponse(chat));
     }
 
     @DeleteMapping("/chats/{chat-id}")
-    public ResponseEntity<ChatResponse> deleteMessagesByChatIds(@PathVariable("chat-id") Long chatId, @RequestBody Set<Long> messageIds) {
+    public ResponseEntity<ChatResponse> deleteMessagesByChatIds(@PathVariable("chat-id") String chatId, @RequestBody Set<String> messageIds) {
         Chat chat = messageService.deleteMessagesByIds(chatId, messageIds);
         return ResponseEntity.ok(chatUtils.getChatResponse(chat));
     }
 
     @DeleteMapping("/{message-id}")
-    public ResponseEntity<Message> deleteMessage(@PathVariable("message-id") Long messageId) {
+    public ResponseEntity<Message> deleteMessage(@PathVariable("message-id") String messageId) {
         Message message = messageService.deleteMessage(messageId);
         return ResponseEntity.ok(message);
     }
